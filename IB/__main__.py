@@ -10,6 +10,8 @@ if __name__ == '__main__':
     from .models import get_activation_bound
     from .tools.information_theory import estimator as est
 
+    from .tools import plot as IBplot
+
     from .experiment import run_experiment
     from .analyse import plot_IB_plane
 
@@ -61,7 +63,16 @@ if __name__ == '__main__':
                 )
 
     def plot(args):
-        pass
+        name = args.name
+        in_path = args.o+("/" if args.o[-1:]!="/" else "")+name+"/"
+        if not os.path.isdir(in_path):
+            raise Exception("Unknown path or experiment: '"+in_path+"'")
+        if args.type=="IB_plane":
+            IBplot.information_plane(path=in_path)
+        elif args.type=="MI_X":
+            IBplot.mi("X", path=in_path)
+        elif args.type=="MI_Y":
+            IBplot.mi("Y", path=in_path)
 
     #def convert(args):
     #    pass
@@ -103,7 +114,10 @@ if __name__ == '__main__':
     ##### PLOT
     parser_plot = subparsers.add_parser("plot", help="Plot IB plane and other statistics")
     parser_plot.add_argument("type", metavar="TYPE", type=str,
-                            help="Type of plot", choices={"plane","test_err"})
+                            help="Type of plot", choices={"IB_plane","MI_X","MI_Y","accuracy"})
+    parser_plot.add_argument("name", metavar="NAME", type=str, help="Name of experiment")
+    parser_plot.add_argument("-o", metavar="PATH", type=str, default="out/",
+                            help="Path to store outputs, default is 'out/'")
     parser_plot.set_defaults(func=plot)
 
     ##### CONVERT

@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
-from . import binning, it#, derr
 
 class StoreActivations(keras.callbacks.Callback):
     def __init__(self, X, out):

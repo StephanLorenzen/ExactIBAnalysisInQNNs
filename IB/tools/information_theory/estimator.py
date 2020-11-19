@@ -18,7 +18,8 @@ def binning_uniform(inp):
     return MI_layers
 
 def binning_quantized(inp):
-    return binning_uniform(inp, n_bins=2**8)
+    _inp = (inp[0], inp[1], {"n_bins":2**8,"upper":2**7-1, "lower":-(2**7-1)})
+    return binning_uniform(_inp)
 
 def binning_adaptive(inp, n_bins=30):
     pass

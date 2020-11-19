@@ -45,11 +45,11 @@ def run_experiment(
     print("Preparing MI estimator...")
     if type(MI_estimator)==list:
         MI_estimators = MI_estimator
-    if type(MI_estimator)==tuple and len(MI_estimator)==2:
+    elif type(MI_estimator)==tuple and len(MI_estimator)==3:
         MI_estimators = [MI_estimator]
     else:
         eparams = dict()
-        MI_estimator = { 
+        est_func = { 
             "binning_uniform":   IT.estimator.binning_uniform,
             "binning_quantized": IT.estimator.binning_quantized,
             "binning_adaptive":  IT.estimator.binning_adaptive,
@@ -57,7 +57,7 @@ def run_experiment(
         }.get(MI_estimator, None)
         if MI_estimator is None:
             raise Exception("Unknown MI estimator!")
-        MI_esitmators = [MI_estimator]
+        MI_esitmators = [(MI_estimator, est_func, eparams)]
 
     print("Preparing output dir...")
     # Prepare output directory
@@ -90,15 +90,18 @@ def run_experiment(
         
         # Compute MI
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
-        for (MI_estimator, eparams) in MI_estimators:
+        for (ename, MI_estimator, eparams) in MI_estimators:
+            if not os.path.isdir(MI_path+ename+"/"):
+                os.makedirs(MI_path+ename+"/")
+            
             ts = time()
             inls = [(A, y, eparams) for A in activations]
             MIs = Pool(16).map(MI_estimator, inls)
-            print(">>> Mutual information ("+str(MI_estimator)+"), elapsed: "+str(int(time()-ts))+"s")
+            print(">>> Mutual information ("+ename+"), elapsed: "+str(int(time()-ts))+"s")
         
             # Store
             MIs = np.array(MIs)
-            np.savetxt(MI_path+_zp(it+1)+"_mi.txt", MIs.reshape(MIs.shape[0],-1))
+            np.savetxt(MI_path+ename+"/"+_zp(it+1)+".txt", MIs.reshape(MIs.shape[0],-1))
         
         # Store train and test accuracy
         print(">> Storing training and test accuracies.")

@@ -20,15 +20,29 @@ if __name__ == '__main__':
         _model = load_model(args.n)
         model = lambda: _model(activation=args.af)
         (lw,up) = get_activation_bound(args.af)
+        
+        quantize = args.q
 
-        # MI_estimator
-        estimator = { 
+        param_est = args.mi
+        if param_est is None:
+            # Default
+            param_est = "binning_quantized" if quantize else "binning_uniform"
+        if param_est=="all":
+            MI_estimator = [
+                ("binning_uniform_30", est.binning_uniform, {"n_bins":30, "upper":up, "lower":lw}),
+                ("binning_uniform_100", est.binning_uniform, {"n_bins":100, "upper":up, "lower":lw}),
+                ("binning_uniform_256", est.binning_uniform, {"n_bins":2**8, "upper":up, "lower":lw}),
+            ]
+        else:
+            # MI_estimator
+            estimator = { 
                 "binning_uniform":   est.binning_uniform,
                 "binning_quantized": est.binning_quantized,
                 "binning_adaptive":  est.binning_adaptive,
                 "knn":               est.knn,
-        }.get(args.mi, None)
-        est_args = {"n_bins":args.nb,"upper":up,"lower":lw}
+            }.get(param_est, None)
+            est_args = {"n_bins":args.nb,"upper":up,"lower":lw}
+            MI_estimator = (param_est+"_"+str(args.nb),estimator,est_args)
 
         out_name = str(int(time())) if args.en is None else args.en
         out_path = args.o+("" if args.o[-1:]=="/" else "/")+out_name+"/"
@@ -39,25 +53,28 @@ if __name__ == '__main__':
         print("Running experiment!")
         print("> model = '"+args.n+"', activation = '"+args.af+"'")
         print("> epochs = "+str(args.e)+", learning rate = "+str(args.lr))
-        print("> MI estimator ='"+args.mi+"', number of bins = "+str(args.nb))
+        print("> quantization = "+("Yes" if args.q else "No"))
+        print("> MI estimator ='"+param_est+"', number of bins = "+str(args.nb))
         print("> repeats = "+str(args.r))
         # Write info to file as well 
         with open(out_path+"info.txt", "w") as info:
-            info.write("model:      "+str(args.n)+"\n")
-            info.write("activation: "+str(args.af)+"\n")
-            info.write("epochs:     "+str(args.e)+"\n")
-            info.write("lr:         "+str(args.lr)+"\n")
-            info.write("data:       "+str(args.d)+"\n")
-            info.write("estimator:  "+str(args.mi)+"\n")
-            info.write("n_bins:     "+str(args.nb)+"\n")
-            info.write("repeats:    "+str(args.r)+"\n")
+            info.write("model:        "+str(args.n)+"\n")
+            info.write("activation:   "+str(args.af)+"\n")
+            info.write("epochs:       "+str(args.e)+"\n")
+            info.write("lr:           "+str(args.lr)+"\n")
+            info.write("quantization: "+("Yes" if args.q else "No")+"\n")
+            info.write("data:         "+str(args.d)+"\n")
+            info.write("estimator:    "+str(args.mi)+"\n")
+            info.write("n_bins:       "+str(args.nb)+"\n")
+            info.write("repeats:      "+str(args.r)+"\n")
 
         run_experiment(
                 model        = model, 
                 lr           = args.lr, 
                 epochs       = args.e, 
                 data         = args.d,
-                MI_estimator = (estimator, est_args),
+                quantize     = quantize,
+                MI_estimator = MI_estimator,
                 repeats      = args.r,
                 out_path     = out_path
                 )
@@ -89,14 +106,16 @@ if __name__ == '__main__':
     parser_exp.add_argument("-n", metavar="NETWORK", type=str, default="shwartz_ziv_99",
                             choices={"shwartz_ziv_99"}, help="Network to use.")
     parser_exp.add_argument("-af", metavar="ACT_FUNC", type=str, default="tanh",
-                            choices={"tanh","ReLU"}, help="Activation function.")
+                            choices={"tanh","relu"}, help="Activation function.")
     parser_exp.add_argument("-lr", type=float, default=10**-4,
                             help="Learning rate used in training.")
     parser_exp.add_argument("-e", metavar="EPOCHS", type=int, default=8000, help="Number of epochs.")
+    parser_exp.add_argument("-q", action='store_const', const=True, default=False,
+                            help="Quantize the model (changes default binning strategy!).")
     
     # Binning setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
-                            default="binning_uniform", choices={"binning_uniform"},
+                            default=None, choices={"binning_uniform", "all"},
                             help="MI estimator.")
     parser_exp.add_argument("-nb", metavar="BINS", type=int, default=30, help="Number of bins.")
 

@@ -89,6 +89,8 @@ if __name__ == '__main__':
             IBplot.mi("X", path=in_path)
         elif args.type=="MI_Y":
             IBplot.mi("Y", path=in_path)
+        elif args.type=="accuracy":
+            IBplot.accuracy(path=in_path)
 
     #def convert(args):
     #    pass

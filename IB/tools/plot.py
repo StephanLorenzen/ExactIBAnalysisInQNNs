@@ -30,11 +30,11 @@ def information_plane(repeats=None, path=None, est=None):
     plt.scatter(x,y,c=c,cmap='inferno')
     plt.show()
     
-def mi(var, repeats=None, path=None):
+def mi(var, repeats=None, path=None, est=None):
     if repeats is None:
-        if path is None:
-            raise Exception("Missing path...")
-        repeats,stds = IBio.load_MI(path)
+        if path is None or est is None:
+            raise Exception("Missing path or estimator...")
+        repeats,stds = IBio.load_MI(path, est=est)
     num_epochs = len(repeats)
     num_layers = len(repeats[0])
     x,ys = list(range(num_epochs)),[[] for _ in range(num_layers)]
@@ -44,3 +44,20 @@ def mi(var, repeats=None, path=None):
     for y in ys:
         plt.plot(x,y)
     plt.show()
+
+def accuracy(path=None):
+    if path is None:
+        raise Exception("Missing path...")
+    train, test = IBio.load_accuracy(path)
+    train,_ = train
+    test, _ = test
+    num_epochs = len(train)
+    assert(len(test)==num_epochs)
+    epochs = list(range(num_epochs))
+
+    plt.plot(epochs, train, color="darkorange", lw=1)
+    plt.plot(epochs, test, color="darkgreen", lw=1)
+
+    plt.show()
+
+

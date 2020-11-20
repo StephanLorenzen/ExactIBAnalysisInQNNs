@@ -13,7 +13,6 @@ if __name__ == '__main__':
     from .tools import plot as IBplot
 
     from .experiment import run_experiment
-    from .analyse import plot_IB_plane
 
     def experiment(args):
         # Model
@@ -85,7 +84,7 @@ if __name__ == '__main__':
         if not os.path.isdir(in_path):
             raise Exception("Unknown path or experiment: '"+in_path+"'")
         if args.type=="IB_plane":
-            IBplot.information_plane(path=in_path)
+            IBplot.information_plane(path=in_path, est=args.mi)
         elif args.type=="MI_X":
             IBplot.mi("X", path=in_path)
         elif args.type=="MI_Y":
@@ -135,6 +134,8 @@ if __name__ == '__main__':
     parser_plot.add_argument("type", metavar="TYPE", type=str,
                             help="Type of plot", choices={"IB_plane","MI_X","MI_Y","accuracy"})
     parser_plot.add_argument("name", metavar="NAME", type=str, help="Name of experiment")
+    parser_plot.add_argument("-mi", metavar="ESTIMATOR", type=str, default="binning_uniform_30",
+                            help="Name of estimator to plot for.")
     parser_plot.add_argument("-o", metavar="PATH", type=str, default="out/",
                             help="Path to store outputs, default is 'out/'")
     parser_plot.set_defaults(func=plot)

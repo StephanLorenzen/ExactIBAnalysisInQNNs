@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-def load_MI(path):
+def load_MI(path, est="binning_uniform_30"):
     if not os.path.isdir(path):
         raise Exception("Directory does not exists '"+path+"'")
     repeats = []
@@ -10,15 +10,15 @@ def load_MI(path):
         return "0"*(3-len(val)) + val
     l = None
     files = []
-    for f in os.listdir(path):
-        if f[-7:]=="_mi.txt":
-            files.append(f)
+    mi_path = path+"mi/"+est+"/"
+    for f in os.listdir(mi_path):
+        files.append(f)
 
     files.sort()
     for f in files:
         cnt = int(f[:3])-1
         assert(cnt==len(repeats))
-        epoch = np.genfromtxt(path+f)
+        epoch = np.genfromtxt(mi_path+f)
         l = len(epoch) if l is None else l
         assert(len(epoch)==l)
         repeats.append(epoch)

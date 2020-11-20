@@ -15,11 +15,11 @@ def show_image_sample(s):
     plt.show()
 
 
-def information_plane(repeats=None, path=None):
+def information_plane(repeats=None, path=None, est=None):
     if repeats is None:
-        if path is None:
-            raise Exception("Missing path...")
-        repeats,_ = IBio.load_MI(path)
+        if path is None or est is None:
+            raise Exception("Missing path or estimator...")
+        repeats,_ = IBio.load_MI(path, est=est)
     num_epochs = len(repeats)
     x,y,c = [],[],[]
     for epoch_idx, MIs in enumerate(repeats):

@@ -116,7 +116,7 @@ if __name__ == '__main__':
     
     # Binning setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
-                            default=None, choices={"binning_uniform", "all"},
+                            default=None, choices={"binning_uniform", "binning_adaptive", "all"},
                             help="MI estimator.")
     parser_exp.add_argument("-nb", metavar="BINS", type=int, default=30, help="Number of bins.")
 

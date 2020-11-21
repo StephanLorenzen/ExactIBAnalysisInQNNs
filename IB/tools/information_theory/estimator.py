@@ -8,6 +8,9 @@ def binning_uniform(inp):
 def binning_adaptive(inp):
     return _binning(inp, binning.adaptive)
 
+def binning_quantized(inp):
+    return _binning(inp, binning.quantized)
+
 def _binning(inp, bin_func):
     A, Y, params = inp
     params = dict() if params is None else params
@@ -22,17 +25,6 @@ def _binning(inp, bin_func):
         MI_TY = discrete.mutual_information(T,Y)
         MI_layers.append((MI_XT,MI_TY))
     return MI_layers
-
-def binning_quantized(inp):
-    return _binning(inp, binning.quantized)
-    A, Y, params = inp
-    
-    import pdb; pdb.set_trace()
-    _inp = (inp[0], inp[1], {"n_bins":2**8,"upper":2**7-1, "lower":-(2**7-1)})
-    return binning_uniform(_inp)
-
-#def binning_adaptive(inp, n_bins=30):
-#    pass
 
 def knn(inp):
     pass

@@ -22,7 +22,7 @@ def FNN(layers, input_dim=12, activation='tanh', init=None):
     return keras.Sequential(k_layers)
 
 def shwartz_ziv_99(activation='tanh', init='truncated_normal'):
-    return FNN([10,7,5,4,3], input_dim=12, activation='tanh', init=init)
+    return FNN([10,7,5,4,3], input_dim=12, activation=activation, init=init)
 
 def _shwartz_ziv_99(activation='tanh'):
     return keras.Sequential([

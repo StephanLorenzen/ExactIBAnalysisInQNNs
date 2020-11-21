@@ -24,6 +24,10 @@ def _binning(inp, bin_func):
     return MI_layers
 
 def binning_quantized(inp):
+    return _binning(inp, binning.quantized)
+    A, Y, params = inp
+    
+    import pdb; pdb.set_trace()
     _inp = (inp[0], inp[1], {"n_bins":2**8,"upper":2**7-1, "lower":-(2**7-1)})
     return binning_uniform(_inp)
 

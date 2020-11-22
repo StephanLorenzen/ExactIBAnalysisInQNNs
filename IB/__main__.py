@@ -31,6 +31,8 @@ if __name__ == '__main__':
                 ("binning_uniform_30", est.binning_uniform, {"n_bins":30, "upper":up, "lower":lw}),
                 ("binning_uniform_100", est.binning_uniform, {"n_bins":100, "upper":up, "lower":lw}),
                 ("binning_uniform_256", est.binning_uniform, {"n_bins":2**8, "upper":up, "lower":lw}),
+                ("binning_adaptive_30", est.binning_adaptive, {"n_bins":30}),
+                ("binning_adaptive_100", est.binning_adaptive, {"n_bins":100}),
             ]
         else:
             # MI_estimator

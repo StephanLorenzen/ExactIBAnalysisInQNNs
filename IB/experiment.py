@@ -108,7 +108,7 @@ def run_experiment(
         pd.DataFrame({
             "train_acc":train_acc,
             "test_acc":test_acc
-        }).to_csv(out_path+_zp(it+1)+"_accuracy.txt", index_label="epoch")
+        }).to_csv(out_path+"accuracy/"+_zp(it+1)+".txt", index_label="epoch")
 
 
 # Model training

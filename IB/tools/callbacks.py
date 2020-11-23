@@ -4,14 +4,15 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 
 class StoreActivations(keras.callbacks.Callback):
-    def __init__(self, X, out):
+    def __init__(self, X, out, skip_first=False):
         super(StoreActivations, self).__init__()
         self.data = X.astype(float)
         self.acts = out
+        self.skip_first = skip_first
 
     def on_epoch_end(self, epoch, logs=None):
         A = []
-        for l in self.model.layers[1:]:
+        for l in self.model.layers[1 if self.skip_first else 0:]:
             A.append(K.function([self.model.inputs], [l.output])(self.data)[0])
         self.acts.append(A)
         

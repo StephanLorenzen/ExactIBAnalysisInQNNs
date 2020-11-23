@@ -63,8 +63,11 @@ def run_experiment(
     # Prepare output directory
     out_path = "out/"+str(int(time())) if out_path is None else out_path
     MI_path  = out_path+"mi/"
+    acc_path = out_path+"accuracy/"
     if not os.path.isdir(MI_path):
         os.makedirs(MI_path)
+    if not os.path.isdir(acc_path):
+        os.makedirs(acc_path)
     def _zp(val):
         val = str(val)
         return "0"*(3-len(val)) + val
@@ -76,15 +79,14 @@ def run_experiment(
         print("> Iteration: "+_zp(it+1))
         ts = time()
         _model = IBmodels.load(model)() if type(model)==str else model()
-        if quantize:
-            _model = tfmo.quantization.keras.quantize_model(_model)
         activations,train_acc,test_acc = train_model(
                                                     _model, 
                                                     lr, 
                                                     epochs, 
                                                     (X_train,y_train), 
                                                     (X_test,y_test), 
-                                                    X
+                                                    X,
+                                                    quantize
                                                     )
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         
@@ -108,11 +110,11 @@ def run_experiment(
         pd.DataFrame({
             "train_acc":train_acc,
             "test_acc":test_acc
-        }).to_csv(out_path+"accuracy/"+_zp(it+1)+".txt", index_label="epoch")
+        }).to_csv(acc_path+_zp(it+1)+".txt", index_label="epoch")
 
 
 # Model training
-def train_model(model, lr, epochs, train_data, test_data, MI_X):
+def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
     X_train,y_train = train_data
     X_test,y_test   = test_data
 
@@ -122,7 +124,10 @@ def train_model(model, lr, epochs, train_data, test_data, MI_X):
     # Options
     loss_fn   = keras.losses.CategoricalCrossentropy()
     optimizer = keras.optimizers.Adam(learning_rate=lr)
-    callback  = callbacks.StoreActivations(MI_X, A)
+    callback  = callbacks.StoreActivations(MI_X, A, skip_first=quantize)
+    
+    if quantize:
+        model = tfmo.quantization.keras.quantize_model(model)
 
     model.compile(optimizer=optimizer,loss=loss_fn,metrics=['accuracy'])
     hist = model.fit(

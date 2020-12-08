@@ -60,4 +60,22 @@ def accuracy(path=None):
 
     plt.show()
 
+def activations(path=None):
+    if path is None:
+        raise Exception("Missing path...")
+    maxs, mins = IBio.load_activations(path)
+    num_epochs, num_layers = mins[0].shape
+    epochs = list(range(num_epochs))
+
+    colors = ["darkorange","darkgreen","red","blue","yellow","black"]
+    for layer in range(num_layers):
+        col = colors[layer]
+        lmin = mins[0][:,layer]
+        lmax = maxs[0][:,layer]
+        plt.plot(epochs, lmax, color=col, lw=1, label="max(layer_"+str(layer+1)+")")
+        plt.plot(epochs, lmin, '--', color=col, lw=1, label="min(layer_"+str(layer+1)+")")
+
+    plt.legend()
+    plt.show()
+
 

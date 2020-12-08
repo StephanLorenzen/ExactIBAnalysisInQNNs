@@ -93,6 +93,8 @@ if __name__ == '__main__':
             IBplot.mi("Y", path=in_path)
         elif args.type=="accuracy":
             IBplot.accuracy(path=in_path)
+        elif args.type=="activations":
+            IBplot.activations(path=in_path)
 
     #def convert(args):
     #    pass
@@ -136,7 +138,7 @@ if __name__ == '__main__':
     ##### PLOT
     parser_plot = subparsers.add_parser("plot", help="Plot IB plane and other statistics")
     parser_plot.add_argument("type", metavar="TYPE", type=str,
-                            help="Type of plot", choices={"IB_plane","MI_X","MI_Y","accuracy"})
+                            help="Type of plot", choices={"IB_plane","MI_X","MI_Y","accuracy","activations"})
     parser_plot.add_argument("name", metavar="NAME", type=str, help="Name of experiment")
     parser_plot.add_argument("-mi", metavar="ESTIMATOR", type=str, default="binning_uniform_30",
                             help="Name of estimator to plot for.")

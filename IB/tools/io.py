@@ -65,3 +65,33 @@ def load_accuracy(path):
     test_mean,  test_std  = np.mean(test_accs,axis=0),  np.std(test_accs,axis=0)
 
     return (train_mean, train_std), (test_mean, test_std)
+
+
+def load_activations(path):
+    if not os.path.isdir(path):
+        raise Exception("Directory does not exists '"+path+"'")
+    def _zp(val):
+        val = str(val)
+        return "0"*(3-len(val)) + val
+    l = None
+    files = []
+    act_path = path+"activations/"
+    for f in os.listdir(act_path):
+        files.append(f)
+
+    max_acts, min_acts = [],[]
+    files.sort()
+    for f in files:
+        cnt = int(f[:3])-1
+        if "_max" in f:
+            max_acts.append(pd.read_csv(act_path+f,index_col="epoch").values)
+        else:
+            min_acts.append(pd.read_csv(act_path+f,index_col="epoch").values)
+    
+
+    max_acts, min_acts = np.array(max_acts), np.array(min_acts)
+    max_mean, max_std  = np.mean(max_acts,axis=0), np.std(max_acts,axis=0)
+    min_mean, min_std  = np.mean(min_acts,axis=0), np.std(min_acts,axis=0)
+
+    return (max_mean, max_std), (min_mean, min_std)
+

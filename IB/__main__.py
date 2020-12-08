@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser_exp.add_argument("-n", metavar="NETWORK", type=str, default="shwartz_ziv_99",
                             choices={"shwartz_ziv_99"}, help="Network to use.")
     parser_exp.add_argument("-af", metavar="ACT_FUNC", type=str, default="tanh",
-                            choices={"tanh","relu"}, help="Activation function.")
+                            choices={"tanh","relu","sigmoid"}, help="Activation function.")
     parser_exp.add_argument("-lr", type=float, default=10**-4,
                             help="Learning rate used in training.")
     parser_exp.add_argument("-e", metavar="EPOCHS", type=int, default=8000, help="Number of epochs.")

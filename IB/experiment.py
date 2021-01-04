@@ -64,10 +64,13 @@ def run_experiment(
     out_path = "out/"+str(int(time())) if out_path is None else out_path
     MI_path  = out_path+"mi/"
     acc_path = out_path+"accuracy/"
+    act_path = out_path+"activations/"
     if not os.path.isdir(MI_path):
         os.makedirs(MI_path)
     if not os.path.isdir(acc_path):
         os.makedirs(acc_path)
+    if not os.path.isdir(act_path):
+        os.makedirs(act_path)
     def _zp(val):
         val = str(val)
         return "0"*(3-len(val)) + val
@@ -79,25 +82,46 @@ def run_experiment(
         print("> Iteration: "+_zp(it+1))
         ts = time()
         _model = IBmodels.load(model)() if type(model)==str else model()
-        activations,train_acc,test_acc = train_model(
-                                                    _model, 
-                                                    lr, 
-                                                    epochs, 
-                                                    (X_train,y_train), 
-                                                    (X_test,y_test), 
-                                                    X,
-                                                    quantize
-                                                    )
+        info,train_acc,test_acc = train_model(
+                                            _model, 
+                                            lr, 
+                                            epochs, 
+                                            (X_train,y_train), 
+                                            (X_test,y_test), 
+                                            X,
+                                            quantize
+                                            )
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         
         # Compute MI
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
+        all_activations = []
+        for A in info["activations"]:
+            all_activations.append(np.concatenate(list(map(lambda x: x.flatten(), A))))
+        all_activations = np.concatenate(all_activations)
+        
         for (ename, MI_estimator, eparams) in MI_estimators:
             if not os.path.isdir(MI_path+ename+"/"):
                 os.makedirs(MI_path+ename+"/")
-            
+    
+            # Set upper and lower
+            if ename=="binning_uniform_"+str(eparams.get("n_bins","")):
+                eparams["bins"] = binning.uniform_bins(
+                                        all_activations,
+                                        eparams["n_bins"],
+                                        upper=np.max(info["max"]),
+                                        lower=np.min(info["min"])
+                                    )
+            elif ename=="binning_adaptive_"+str(eparams.get("n_bins","")):
+                eparams["bins"] = binning.adaptive_bins(
+                                        all_activations,
+                                        eparams["n_bins"],
+                                        upper=np.max(info["max"]),
+                                        lower=np.min(info["min"])
+                                    )
             ts = time()
-            inls = [(A, y, eparams) for A in activations]
+            inls = [(A, y, eparams) for A in info["activations"]]
+            #MIs = [MI_estimator(inp) for inp in inls]
             MIs = Pool(16).map(MI_estimator, inls)
             print(">>> Mutual information ("+ename+"), elapsed: "+str(int(time()-ts))+"s")
         
@@ -105,13 +129,22 @@ def run_experiment(
             MIs = np.array(MIs)
             np.savetxt(MI_path+ename+"/"+_zp(it+1)+".txt", MIs.reshape(MIs.shape[0],-1))
         
-        # Store train and test accuracy
+        # Store train and test accuracy and activation min/max
         print(">> Storing training and test accuracies.")
         pd.DataFrame({
             "train_acc":train_acc,
             "test_acc":test_acc
-        }).to_csv(acc_path+_zp(it+1)+".txt", index_label="epoch")
-
+        }).to_csv(acc_path+_zp(it+1)+".csv", index_label="epoch")
+        print(">> Storing activation info.")
+        col_layers = ["layer_"+str(i+1) for i in range(info["min"].shape[1])]
+        pd.DataFrame(
+            np.array(info["min"]),
+            columns=col_layers
+        ).to_csv(act_path+_zp(it+1)+"_min.csv", index_label="epoch")
+        pd.DataFrame(
+            np.array(info["max"]),
+            columns=col_layers
+        ).to_csv(act_path+_zp(it+1)+"_max.csv", index_label="epoch")
 
 # Model training
 def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
@@ -120,11 +153,11 @@ def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
 
     # Start training
     # Output
-    A = []
+    info = dict()
     # Options
     loss_fn   = keras.losses.CategoricalCrossentropy()
     optimizer = keras.optimizers.Adam(learning_rate=lr)
-    callback  = callbacks.StoreActivations(MI_X, A, skip_first=quantize)
+    callback  = callbacks.TrainingTracker(MI_X, info, skip_first=quantize)
     
     if quantize:
         model = tfmo.quantization.keras.quantize_model(model)
@@ -139,5 +172,7 @@ def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
             validation_data=test_data,
             verbose=0
             )
-    return A, hist.history["accuracy"], hist.history["val_accuracy"]
+    info["min"] = np.array(info["min"])
+    info["max"] = np.array(info["max"])
+    return info, hist.history["accuracy"], hist.history["val_accuracy"]
 

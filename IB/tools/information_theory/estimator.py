@@ -1,3 +1,5 @@
+import numpy as np
+
 from .. import binning
 from . import discrete
 
@@ -20,7 +22,12 @@ def _binning(inp, bin_func):
     up = "max" if up is None else up
     MI_layers = []
     for layer in A:
-        T = bin_func(layer,n_bins,lower=lw,upper=up)
+        if "bins" in params:
+            # Use precomputed bins
+            T = np.digitize(layer, params["bins"])
+        else:
+            # Compute new binning
+            T = bin_func(layer,n_bins,lower=lw,upper=up)
         MI_XT = discrete.entropy(T)
         MI_TY = discrete.mutual_information(T,Y)
         MI_layers.append((MI_XT,MI_TY))

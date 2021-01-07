@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow import keras
-import tensorflow_model_optimization as tfmo
 import numpy as np
 import pandas as pd
 import os
@@ -81,9 +80,8 @@ def run_experiment(
         # Train and get activations
         print("> Iteration: "+_zp(it+1))
         ts = time()
-        _model = IBmodels.load(model)() if type(model)==str else model()
         info,train_acc,test_acc = train_model(
-                                            _model, 
+                                            model, 
                                             lr, 
                                             epochs, 
                                             (X_train,y_train), 
@@ -145,9 +143,17 @@ def run_experiment(
             np.array(info["max"]),
             columns=col_layers
         ).to_csv(act_path+_zp(it+1)+"_max.csv", index_label="epoch")
+        pd.DataFrame(
+            np.array(info["unique"]),
+            columns=col_layers+["hidden_layers"]
+        ).to_csv(act_path+_zp(it+1)+"_unique.csv", index_label="epoch")
 
 # Model training
 def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
+    if type(model)==str:
+        model = IBmodels.load(model)
+    model = model()#quantize=quantize)
+
     X_train,y_train = train_data
     X_test,y_test   = test_data
 
@@ -157,11 +163,8 @@ def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
     # Options
     loss_fn   = keras.losses.CategoricalCrossentropy()
     optimizer = keras.optimizers.Adam(learning_rate=lr)
-    callback  = callbacks.TrainingTracker(MI_X, info, skip_first=quantize)
+    callback  = callbacks.TrainingTracker(MI_X, info, quantized=quantize)
     
-    if quantize:
-        model = tfmo.quantization.keras.quantize_model(model)
-
     model.compile(optimizer=optimizer,loss=loss_fn,metrics=['accuracy'])
     hist = model.fit(
             X_train,
@@ -174,5 +177,6 @@ def train_model(model, lr, epochs, train_data, test_data, MI_X, quantize):
             )
     info["min"] = np.array(info["min"])
     info["max"] = np.array(info["max"])
+    info["unique"] = np.array(info["unique"])
     return info, hist.history["accuracy"], hist.history["val_accuracy"]
 

@@ -8,9 +8,9 @@ if __name__ == '__main__':
 
     from .models import load as load_model
     from .models import get_activation_bound
-    from .tools.information_theory import estimator as est
+    from .util.estimator import BinningEstimator, QuantizedEstimator
 
-    from .tools import plot as IBplot
+    from .util import plot as IBplot
 
     from .experiment import run_experiment
 
@@ -19,32 +19,52 @@ if __name__ == '__main__':
         
         # Model
         _model = load_model(args.n)
-        model = lambda: _model(activation=args.af, quantize=quantize)
+        Model = lambda: (_model(activation=args.af, quantize=quantize), quantize)
         (lw,up) = get_activation_bound(args.af)
-        
 
-        param_est = args.mi
-        if param_est is None:
-            # Default
-            param_est = "binning_quantized" if quantize else "binning_uniform"
-        if param_est=="all":
-            MI_estimator = [
-                ("binning_uniform_30", est.binning_uniform, {"n_bins":30, "upper":up, "lower":lw}),
-                ("binning_uniform_100", est.binning_uniform, {"n_bins":100, "upper":up, "lower":lw}),
-                ("binning_uniform_256", est.binning_uniform, {"n_bins":2**8, "upper":up, "lower":lw}),
-                ("binning_adaptive_30", est.binning_adaptive, {"n_bins":30}),
-                ("binning_adaptive_100", est.binning_adaptive, {"n_bins":100}),
+        if quantize:
+            MI_estimators = [
+                QuantizedEstimator(bounds="neuron"),
+                QuantizedEstimator(bounds="layer"),
             ]
         else:
+            MI_estimators = []
+            for n_bins in [30, 100, 200]:
+            #n_bins = 30 if args.af=="tanh" else 100
+                MI_estimators += [
+                    BinningEstimator("uniform", n_bins=n_bins, bounds="neuron"),
+                    BinningEstimator("uniform", n_bins=n_bins, bounds="layer"),
+                    #BinningEstimator("adaptive", n_bins=n_bins, bounds="neuron"),
+                    #BinningEstimator("adaptive", n_bins=n_bins, bounds="layer"),
+                ]
+                if lw is not None and up is not None:
+                    MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds=(lw,up)))
+                else:
+                    MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="global"))
+        
+
+        #param_est = args.mi
+        #if param_est is None:
+            # Default
+        #    param_est = "binning_quantized" if quantize else "binning_uniform"
+        #if param_est=="all":
+        #    MI_estimator = [
+        #        ("binning_uniform_30", est.binning_uniform, {"n_bins":30, "upper":up, "lower":lw}),
+                #("binning_uniform_100", est.binning_uniform, {"n_bins":100, "upper":up, "lower":lw}),
+                #("binning_uniform_256", est.binning_uniform, {"n_bins":2**8, "upper":up, "lower":lw}),
+        #        ("binning_adaptive_30", est.binning_adaptive, {"n_bins":30}),
+                #("binning_adaptive_100", est.binning_adaptive, {"n_bins":100}),
+        #    ]
+        #else:
             # MI_estimator
-            estimator = { 
-                "binning_uniform":   est.binning_uniform,
-                "binning_quantized": est.binning_quantized,
-                "binning_adaptive":  est.binning_adaptive,
-                "knn":               est.knn,
-            }.get(param_est, None)
-            est_args = {"n_bins":args.nb,"upper":up,"lower":lw}
-            MI_estimator = (param_est+"_"+str(args.nb),estimator,est_args)
+        #    estimator = { 
+        #        "binning_uniform":   est.binning_uniform,
+        #        "binning_quantized": est.binning_quantized,
+        #        "binning_adaptive":  est.binning_adaptive,
+        #        "knn":               est.knn,
+        #    }.get(param_est, None)
+        #    est_args = {"n_bins":args.nb,"upper":up,"lower":lw}
+        #    MI_estimator = (param_est+"_"+str(args.nb),estimator,est_args)
 
         out_name = str(int(time())) if args.en is None else args.en
         out_path = args.o+("" if args.o[-1:]=="/" else "/")+out_name+"/"
@@ -56,7 +76,7 @@ if __name__ == '__main__':
         print("> model = '"+args.n+"', activation = '"+args.af+"'")
         print("> epochs = "+str(args.e)+", learning rate = "+str(args.lr))
         print("> quantization = "+("Yes" if args.q else "No"))
-        print("> MI estimator ='"+param_est+"', number of bins = "+str(args.nb))
+        #print("> MI estimator ='"+param_est+"', number of bins = "+str(args.nb))
         print("> repeats = "+str(args.r))
         # Write info to file as well 
         with open(out_path+"info.txt", "w") as info:
@@ -66,19 +86,23 @@ if __name__ == '__main__':
             info.write("lr:           "+str(args.lr)+"\n")
             info.write("quantization: "+("Yes" if args.q else "No")+"\n")
             info.write("data:         "+str(args.d)+"\n")
-            info.write("estimator:    "+str(args.mi)+"\n")
+            #info.write("estimator:    "+str(args.mi)+"\n")
             info.write("n_bins:       "+str(args.nb)+"\n")
             info.write("repeats:      "+str(args.r)+"\n")
 
+        first_rep = args.sf
+        if first_rep > 1:
+            print("> Restarting from repetition "+str(first_rep))
         run_experiment(
-                model        = model, 
-                lr           = args.lr, 
-                epochs       = args.e, 
+                Model,
+                MI_estimators,
                 data         = args.d,
-                quantize     = quantize,
-                MI_estimator = MI_estimator,
+                lr           = args.lr, 
+                batch_size   = 256,
+                epochs       = args.e, 
                 repeats      = args.r,
-                out_path     = out_path
+                out_path     = out_path,
+                start_from   = first_rep
                 )
 
     def plot(args):
@@ -134,6 +158,7 @@ if __name__ == '__main__':
                             help="Name of experiment, default is auto-generated from parameters.")
     parser_exp.add_argument("-o", metavar="PATH", type=str, default="out/",
                             help="Path to store outputs, default is 'out/'")
+    parser_exp.add_argument("-sf", metavar="FIRST_REP", type=int, default=1, help="Starting repatition (default 1).")
     parser_exp.set_defaults(func=experiment)
 
     ##### PLOT

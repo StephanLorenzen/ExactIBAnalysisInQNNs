@@ -4,7 +4,7 @@ import tensorflow_model_optimization as tfmo
 from tensorflow import keras 
 from tensorflow.keras import layers as L
 
-from ..tools import quantization as IBQ
+from ..util import quantization as IBQ
 
 def FNN(layers, input_dim=12, activation='tanh', init=None, quantize=False):
     if init not in [None, 'truncated_normal']:
@@ -26,23 +26,20 @@ def FNN(layers, input_dim=12, activation='tanh', init=None, quantize=False):
         q_scope = tfmo.quantization.keras.quantize_scope
 
         # Relevant QuantizeConfigs
-        QConfig = {
-            "tanh":IBQ.TanhQuantizeConfig,
-            "relu6":IBQ.ReLU6QuantizeConfig,
-        }.get(activation, IBQ.DefaultDenseQuantizeConfig)
+        QConfig = None
+        if activation == "tanh":
+            activation = "linear"
+            QConfig = IBQ.TanhQuantizeConfig
         k_layers = [keras.layers.InputLayer(input_shape=input_dim)]
         for l in layers:
+            qconf = None if QConfig is None else QConfig()
             k_layers.append(
-                q_layer(L.Dense(l, activation="linear", kernel_initializer=k_init(l)), QConfig())
+                q_layer(L.Dense(l, activation=activation, kernel_initializer=k_init(l)), qconf)
             )
-        k_layers.append(q_layer(L.Dense(2, activation='linear'),IBQ.SoftMaxQuantizeConfig()))
+        k_layers.append(q_layer(L.Dense(2, activation='softmax')))
         model = keras.Sequential(k_layers)
-        
         with q_scope({
-            'DefaultDenseQuantizeConfig': IBQ.DefaultDenseQuantizeConfig,
-            'ReLU6QuantizeConfig': IBQ.ReLU6QuantizeConfig,
             'TanhQuantizeConfig': IBQ.TanhQuantizeConfig,
-            'SoftMaxQuantizeConfig': IBQ.SoftMaxQuantizeConfig,
         }):
             model = q_apply(model)
         

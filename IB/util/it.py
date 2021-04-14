@@ -1,7 +1,9 @@
 import numpy as np
 
 def distribution_from_bins(bins):
+    # bins in N^(n times l)
     _, counts = np.unique(bins, axis=0, return_counts=True)
+    # counts in N^n
     return counts/sum(counts)
 
 def entropy(X):

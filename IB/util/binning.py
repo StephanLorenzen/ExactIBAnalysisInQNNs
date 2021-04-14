@@ -3,24 +3,23 @@ import tensorflow as tf
 # @param values : [np.array(shape=(n,layer_d))], len = L
 # @return       : [], len = L
 
-def uniform_bins(values, n_bins, upper='max', lower='min'):
+def uniform_bins(n_bins, values=None, upper='max', lower='min'):
+    assert(values is not None or (upper!='max' and lower!='min'))
     if upper=='max':
         upper = np.max(values)
     if lower=='min':
         lower = np.min(values)
-    try:
-        step = (upper-lower)/n_bins
-        bins = np.arange(lower, upper, step)
-        return bins
-    except:
-        print((upper,lower,n_bins,step))
-        import pdb; pdb.set_trace()
+    if upper==lower:
+        upper = lower+10**-9
+    step = (upper-lower)/n_bins
+    bins = np.arange(lower, upper, step)
+    return bins
 
-def uniform(values, n_bins, upper='max', lower='min'):
-    bins = uniform_bins(values, n_bins, upper, lower)
-    return np.digitize(values.flatten(), bins)
+def uniform(n_bins, values=None, upper='max', lower='min'):
+    bins = uniform_bins(n_bins, values, upper, lower)
+    return np.digitize(values, bins)
 
-def adaptive_bins(values, n_bins, upper=None, lower=None):
+def adaptive_bins(n_bins, values):
     valflat = values.flatten()
     valflat.sort()
     bsize  = int(len(valflat)/n_bins)
@@ -30,11 +29,11 @@ def adaptive_bins(values, n_bins, upper=None, lower=None):
     bins   = [valflat[0]-1] + bins + [valflat[-1]+1]
     return bins
 
-def adaptive(values, n_bins, upper=None, lower=None):
-    bins = adaptive_bins(values, n_bins, upper, lower)
-    return np.digitize(values.flatten(), bins)
+def adaptive(n_bins, values):
+    bins = adaptive_bins(n_bins, values)
+    return np.digitize(values, bins)
 
-def quantized(values, n_bins=None, upper=None, lower=None):
+def quantized(values):
     upper = np.max(values)
     lower = np.min(values)
     qvals = tf.quantization.quantize(values, lower, upper, tf.qint8)[0]

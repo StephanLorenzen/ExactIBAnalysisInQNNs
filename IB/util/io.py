@@ -1,4 +1,5 @@
 import os
+import math
 import numpy as np
 import pandas as pd
 
@@ -64,7 +65,9 @@ def load_accuracy(path):
     train_mean, train_std = np.mean(train_accs,axis=0), np.std(train_accs,axis=0)
     test_mean,  test_std  = np.mean(test_accs,axis=0),  np.std(test_accs,axis=0)
 
-    return (train_mean, train_std), (test_mean, test_std)
+    train_ci = 1.96*train_std/math.sqrt(len(train_accs))
+    test_ci  = 1.96*test_std/math.sqrt(len(test_accs))
+    return (train_mean, train_std, train_ci), (test_mean, test_std, test_ci)
 
 
 def load_activations(path):

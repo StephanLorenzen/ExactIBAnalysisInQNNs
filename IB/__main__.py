@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     from .models import load as load_model
     from .models import get_activation_bound
-    from .util.estimator import BinningEstimator, QuantizedEstimator
+    from .util.estimator import BinningEstimator, QuantizedEstimator, KNNEstimator
 
     from .util import plot as IBplot
 
@@ -16,32 +16,35 @@ if __name__ == '__main__':
 
     def experiment(args):
         quantize = args.q
-        
+        bits = args.b
+
         # Model
         _model = load_model(args.n)
-        Model = lambda: (_model(activation=args.af, quantize=quantize), quantize)
+        Model = lambda: (_model(activation=args.af, quantize=quantize, num_bits=bits), quantize)
         (lw,up) = get_activation_bound(args.af)
 
         if quantize:
             MI_estimators = [
-                QuantizedEstimator(bounds="neuron"),
-                QuantizedEstimator(bounds="layer"),
+                #QuantizedEstimator(bounds="neuron", bits=bits),
+                QuantizedEstimator(bounds="layer", bits=bits),
+                #QuantizedEstimator(bounds=(lw,up)),
             ]
+        elif args.mi=="knn":
+            MI_estimators = [KNNEstimator(k=10)]
         else:
             MI_estimators = []
-            for n_bins in [30, 100, 200]:
-            #n_bins = 30 if args.af=="tanh" else 100
+            for n_bins in [30, 100, 256]:
                 MI_estimators += [
-                    BinningEstimator("uniform", n_bins=n_bins, bounds="neuron"),
+                    #BinningEstimator("uniform", n_bins=n_bins, bounds="neuron"),
                     BinningEstimator("uniform", n_bins=n_bins, bounds="layer"),
-                    #BinningEstimator("adaptive", n_bins=n_bins, bounds="neuron"),
-                    #BinningEstimator("adaptive", n_bins=n_bins, bounds="layer"),
+                    BinningEstimator("uniform", n_bins=n_bins, bounds="global"),
                 ]
                 if lw is not None and up is not None:
                     MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds=(lw,up)))
-                else:
-                    MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="global"))
-        
+            MI_estimators += [
+                #QuantizedEstimator(bounds="neuron", bits=32),
+                QuantizedEstimator(bounds="layer", bits=32),
+            ]
 
         #param_est = args.mi
         #if param_est is None:
@@ -85,6 +88,7 @@ if __name__ == '__main__':
             info.write("epochs:       "+str(args.e)+"\n")
             info.write("lr:           "+str(args.lr)+"\n")
             info.write("quantization: "+("Yes" if args.q else "No")+"\n")
+            info.write("bits:         "+str(args.b)+"\n")
             info.write("data:         "+str(args.d)+"\n")
             #info.write("estimator:    "+str(args.mi)+"\n")
             info.write("n_bins:       "+str(args.nb)+"\n")
@@ -113,9 +117,9 @@ if __name__ == '__main__':
         if args.type=="IB_plane":
             IBplot.information_plane(path=in_path, est=args.mi)
         elif args.type=="MI_X":
-            IBplot.mi("X", path=in_path)
+            IBplot.mi("X", path=in_path, est=args.mi)
         elif args.type=="MI_Y":
-            IBplot.mi("Y", path=in_path)
+            IBplot.mi("Y", path=in_path, est=args.mi)
         elif args.type=="accuracy":
             IBplot.accuracy(path=in_path)
         elif args.type=="activations":
@@ -142,10 +146,11 @@ if __name__ == '__main__':
     parser_exp.add_argument("-e", metavar="EPOCHS", type=int, default=8000, help="Number of epochs.")
     parser_exp.add_argument("-q", action='store_const', const=True, default=False,
                             help="Quantize the model (changes default binning strategy!).")
+    parser_exp.add_argument("-b", metavar="BITS", type=int, default=8, help="Number of bits for quantization, if -q set, must be in (4,8).")
     
     # Binning setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
-                            default=None, choices={"binning_uniform", "binning_adaptive", "all"},
+                            default=None, choices={"binning_uniform", "binning_adaptive", "knn", "all"},
                             help="MI estimator.")
     parser_exp.add_argument("-nb", metavar="BINS", type=int, default=30, help="Number of bins.")
 

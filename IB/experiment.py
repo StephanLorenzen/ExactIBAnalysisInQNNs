@@ -7,6 +7,8 @@ from time import time
 
 from multiprocessing import Pool
 
+from carbontracker.tracker import CarbonTracker as CT
+
 from . import data as IBdata, models as IBmodels
 from .models import callbacks
 from .util import estimator
@@ -20,7 +22,8 @@ def run_experiment(
         epochs=8000,
         repeats=1,
         out_path=None,
-        start_from=1
+        start_from=1,
+        use_carbontracker=False,
         ):
    
     seed = 1000
@@ -39,8 +42,12 @@ def run_experiment(
     
     # Run experiment loop
     print("Starting experiment loop...")
+    if use_carbontracker:
+        tracker = CT(epochs=1)
     for rep in range(start_from-1, repeats):
         print(">>> Iteration: "+_zp(rep+1))
+        if use_carbontracker:
+            tracker.epoch_start()
         
         # Train and get activations
         print(">> Fitting model, "+str(epochs)+" epochs")
@@ -80,6 +87,10 @@ def run_experiment(
         #        np.array(info["unique"]),
         #        columns=col_layers+["hidden_layers"]
         #    ).to_csv(act_path+_zp(rep+1)+"_unique.csv", index_label="epoch")
+        if use_carbontracker:
+            tracker.epoch_stop()
+    if use_carbontracker:
+        tracker.stop()
 
 def _zp(val):
     val = str(val)

@@ -106,7 +106,8 @@ if __name__ == '__main__':
                 epochs       = args.e, 
                 repeats      = args.r,
                 out_path     = out_path,
-                start_from   = first_rep
+                start_from   = first_rep,
+                use_carbontracker = False 
                 )
 
     def plot(args):

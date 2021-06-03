@@ -38,30 +38,25 @@ def FNN(layers, input_dim=12, activation='tanh', init=None, quantize=False, fixe
                 4: IBQ.Tanh4BitConfig,
                 8: IBQ.Tanh8BitConfig,
             }[num_bits]
-            #QConfig = IBQ.TanhFixedQuantizeConfig if fixed_quant else IBQ.TanhQuantizeConfig
         k_layers = [keras.layers.InputLayer(input_shape=input_dim)]
         for l in layers:
-            qconf = QConfig()#num_bits=num_bits) #None if QConfig is None else QConfig()
+            qconf = QConfig()
             k_layers.append(
                 q_layer(L.Dense(l, activation=activation, kernel_initializer=k_init(l)), qconf)
             )
-        k_layers.append(q_layer(L.Dense(2, activation='softmax'), DQC()))#IBQ.DefaultDenseQuantizeConfig(num_bits=num_bits)))
+        k_layers.append(q_layer(L.Dense(2, activation='softmax'), DQC()))
         model = keras.Sequential(k_layers)
         with q_scope({
             'Default4BitConfig':  IBQ.Default4BitConfig,
             'Default8BitConfig':  IBQ.Default8BitConfig,
             'Tanh4BitConfig':     IBQ.Tanh4BitConfig,
             'Tanh8BitConfig':     IBQ.Tanh8BitConfig,
-            #'DefaultDenseQuantizeConfig' : IBQ.DefaultDenseQuantizeConfig,
-            #'TanhQuantizeConfig': IBQ.TanhQuantizeConfig,
-            #'TanhFixedQuantizeConfig': IBQ.TanhFixedQuantizeConfig,
         }):
             model = q_apply(model)
         
         return model
     else:
         # Standard model
-
         k_layers = [keras.layers.InputLayer(input_shape=input_dim)]
         for l in layers:
             k_layers.append(L.Dense(l, activation=activation, kernel_initializer=k_init(l)))

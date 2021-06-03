@@ -39,11 +39,6 @@ def quantized(values, upper='max', lower='min', bits=8):
     if upper==lower:
         upper = lower+10**-9
 
-    # Something is wrong/has changed with quantize below. Use our own instead.
-    #qvals = tf.quantization.quantize(values, lower, upper, tf.qint8)[0]
-    # qvals now int8s in range(-128,127). Add 128 to get bins (will convert to int16) 
-    #return qvals.numpy()+128
-    
     # Map 
     vals_mapped = (values - lower) * 2**bits / (upper - lower)
     # Round

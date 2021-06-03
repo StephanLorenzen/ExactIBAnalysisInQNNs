@@ -170,37 +170,3 @@ class KNNEstimator(BaseEstimator):
             MI_TY = _knn_I(self.k, layer, Y)
             MI_layers.append((MI_XT,MI_TY))
         return MI_layers
-
-# MI estimators
-def binning_uniform(inp):
-    return _binning(inp, binning.uniform)
-
-def binning_adaptive(inp):
-    return _binning(inp, binning.adaptive)
-
-def binning_quantized(inp):
-    return _binning(inp, binning.quantized)
-
-def _binning(inp, bin_func):
-    A, Y, params = inp
-    params = dict() if params is None else params
-    bs = params.get("binning_strategy", "neuron") # neuron, layer, fixed 
-    n_bins = params.get("n_bins", 30)
-    MI_layers = []
-    for layer in A:
-        if bs=="neuron":
-            # Compute binning neuron wise
-            T = np.apply_along_axis(lambda nr: bin_func(nr, n_bins), 0, layer)
-        elif bs=="layer":
-            # Compute binning layer wise
-            T = bin_func(layer,n_bins)
-        else: # bs==fixed
-            assert("bins" in params)
-            # Use precomputed bins
-            T = np.digitize(layer, params["bins"])
-        
-        MI_XT = discrete.entropy(T)
-        MI_TY = discrete.mutual_information(T,Y)
-        MI_layers.append((MI_XT,MI_TY))
-    return MI_layers
-

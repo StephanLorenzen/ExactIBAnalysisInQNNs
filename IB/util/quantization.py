@@ -47,11 +47,11 @@ class NoWeightDenseQuantizeConfig(DefaultDenseQuantizeConfig):
         return []
     def set_quantize_weights(self, layer, quantize_weights):
         return
-# Tanh, Relu6, Softmax
+
+# Tanh
 class TanhQuantizeConfig(NoWeightDenseQuantizeConfig):
     def get_activations_and_quantizers(self, layer):
         return [(layer.activation, TanhQuantizer(num_bits=self.num_bits))]
-
 # Tanh configs
 class Tanh4BitConfig(TanhQuantizeConfig):
     def __init__(self):
@@ -67,33 +67,3 @@ class Default4BitConfig(DefaultDenseQuantizeConfig):
 class Default8BitConfig(DefaultDenseQuantizeConfig):
     def __init__(self):
         super().__init__(num_bits=8)
-
-
-"""
-# ReLU6
-class ReLU6QuantizeConfig(NoWeightDenseQuantizeConfig):
-    def __init__(self, num_bits=None):
-        super().__init__(num_bits=num_bits)
-    def get_activations_and_quantizers(self, layer):
-        return [(layer.activation, ReLU6Quantizer(num_bits=self.num_bits))]
-# Tanh
-class TanhQuantizeConfig(NoWeightDenseQuantizeConfig):
-    def __init__(self, num_bits=None):
-        print("TQC",num_bits)
-        super().__init__(num_bits=num_bits)
-    def get_activations_and_quantizers(self, layer):
-        return [(layer.activation, TanhQuantizer(num_bits=self.num_bits))]
-class TanhFixedQuantizeConfig(NoWeightDenseQuantizeConfig):
-    def __init__(self, num_bits=None):
-        super().__init__(num_bits=num_bits)
-    def get_activations_and_quantizers(self, layer):
-        return [(layer.activation, TanhFixedQuantizer(num_bits=self.num_bits))]
-# SoftMax
-class SoftMaxQuantizeConfig(NoWeightDenseQuantizeConfig):
-    def __init__(self, num_bits=None):
-        super().__init__(num_bits=num_bits)
-    def get_activations_and_quantizers(self, layer):
-        return [(layer.activation, SoftMaxQuantizer(num_bits=self.num_bits))]
-    """
-
-

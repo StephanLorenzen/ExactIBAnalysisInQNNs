@@ -6,15 +6,6 @@ import matplotlib.pyplot as plt
 
 from . import io as IBio
 
-def show_image_sample(s):
-    plt.figure(figsize=s.shape[:2])
-    plt.xticks([])
-    plt.yticks([])
-    plt.grid(False)
-    plt.imshow(s)
-    plt.show()
-
-
 def information_plane(repeats=None, path=None, est=None):
     if repeats is None:
         if path is None or est is None:
@@ -23,7 +14,6 @@ def information_plane(repeats=None, path=None, est=None):
     num_epochs = len(repeats)
     x,y,c = [],[],[]
     for epoch_idx, MIs in enumerate(repeats):
-        #MIs = MIs[:-3]
         c += [epoch_idx/num_epochs]*len(MIs)
         for (XT,TY) in MIs:
             x.append(XT)
@@ -44,7 +34,6 @@ def mi(var, repeats=None, path=None, est=None):
             ys[i].append(TY if var.lower()=='y' else XT)
     for y in ys:
         plt.plot(x,y)
-    #plt.set_title("MI(T,"+str(var)+"), "+str(path)+", "+str(est))
     plt.show()
 
 def accuracy(path=None):

@@ -1,5 +1,16 @@
-# Deafult output dir
+# Default output dir
 out
+experiment/out
+# Plots directory
+experiment/plots
+# experiment IB-link
+experiment/IB
+# Tex bi-files and outputs
+*.aux
+*.log
+*.pdf
+# Data out-files
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

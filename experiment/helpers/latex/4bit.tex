@@ -1,0 +1,21 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+
+\begin{document}
+\pgfplotstableread[col sep=comma]{quantize-extra/tanh/quantized_layer_4_bits.csv}\iplaneTanh
+\pgfplotstableread[col sep=comma]{quantize-extra/relu/quantized_layer_4_bits.csv}\iplaneRelu
+
+\begin{tikzpicture}
+	\begin{groupplot}[group style={group size= 3 by 1, horizontal sep=2cm,vertical sep=0cm}]
+		\nextgroupplot[IB axis, title=\tanh]
+			\addplot[IB plot] table[x=x,y=y]{\iplaneTanh};
+		\nextgroupplot[IB axis, title=\relu, IB colorbar single]
+			\addplot[IB plot] table[x=x,y=y]{\iplaneRelu};
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

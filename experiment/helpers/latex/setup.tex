@@ -1,0 +1,62 @@
+
+\renewcommand{\tanh}{\textsc{Tanh}}
+\newcommand{\relu}{\textsc{ReLU}}
+
+\usepackage{xcolor}
+\definecolor{colTanh}{rgb}{0,0.5,0}
+\definecolor{colRelu}{rgb}{0.5, 0, 0}
+
+\pgfplotsset{
+compat=1.16,
+/pgfplots/colormap={info_plane}{
+	[1cm]rgb255(0cm)=(0,0,0)rgb255(3cm)=(255,0,0)rgb255(8cm)=(255,255,0)
+},
+IB plot/.style={
+    scatter,only marks,mark=none,
+    scatter/position=absolute,  
+    scatter/@pre marker code/.code={
+        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}/4.8] (pt-\pgfkeysvalueof{/data point/index}) at 
+    (\pgfkeysvalueof{/data point/x},\pgfkeysvalueof{/data point/y}){};},
+    scatter/@post marker code/.code={%
+    \ifnum\pgfkeysvalueof{/data point/index}=0
+    \else
+      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},6)}
+      \ifnum\itest=0
+      \else
+        \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
+        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}/4.8, opacity=0.15] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
+      \fi
+    \fi
+}},
+IB axis/.style={
+	height=0.7\linewidth,
+	width=0.7\linewidth,
+	colormap name=hot,
+	point meta min=1,
+	point meta max=8000,	
+	ymajorgrids=true,
+	xmajorgrids=true,
+	yticklabels={0.0,0.0,0.2,0.4,0.6,0.8,1.0},
+        xticklabels={,0,2,4,6,8,10,12},
+        ymin=0,ymax=1.03,
+	xmin=0,xmax=12.36,
+	ylabel={$I(X,T_i)$},
+	xlabel={$I(T_i,Y)$},
+},
+IB colorbar single/.style={
+   colorbar,
+},
+IB noY/.style={
+	yticklabels={},
+	ylabel={},
+},
+IB noX/.style={
+	xticklabels={},
+	xlabel={},
+},
+}
+\tikzset{
+IB text/.style={
+	fill=black!10,
+},
+}

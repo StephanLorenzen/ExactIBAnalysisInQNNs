@@ -1,8 +1,10 @@
 experiments : clean link
 
+# Link to python package
 link:
 	ln -s ../IB IB
 
+# Run experiment
 binning:
 	python helpers/binning.py tanh
 	python helpers/binning.py relu
@@ -15,6 +17,7 @@ quantize-extra:
 	python helpers/quantize.py tanh 32
 	python helpers/quantize.py relu 32
 
+# Create latex plots
 plot-binning:
 	mkdir -p plots
 	python helpers/plot.py binning
@@ -45,6 +48,7 @@ plot-quantize-extra:
 	cd helpers/latex; rm -f 4bit*.{log,aux}; rm -f 32bit*.{log,aux}; rm -rf quantize-extra
 	mv helpers/latex/{4,32}bit*.pdf plots/
 
+# Clean
 clean:
 	rm -f IB
 	rm -rf out

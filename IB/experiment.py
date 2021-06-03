@@ -82,11 +82,6 @@ def run_experiment(
             np.array(info["max"]),
             columns=col_layers
         ).to_csv(act_path+_zp(rep+1)+"_max.csv", index_label="epoch")
-        #if "unique" in info:
-        #    pd.DataFrame(
-        #        np.array(info["unique"]),
-        #        columns=col_layers+["hidden_layers"]
-        #    ).to_csv(act_path+_zp(rep+1)+"_unique.csv", index_label="epoch")
         if use_carbontracker:
             tracker.epoch_stop()
     if use_carbontracker:
@@ -153,7 +148,6 @@ def compute_MI(Estimator, activations, y):
     # Prepare input
     inps = [(A, y, Estimator) for A in activations]
     # Process
-    #MIs = [_apply_estimator(inp) for inp in inps]
     MIs = Pool(16).map(_apply_estimator, inps)
     return np.array(MIs)
 

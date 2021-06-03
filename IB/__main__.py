@@ -16,58 +16,22 @@ if __name__ == '__main__':
 
     def experiment(args):
         quantize = args.q
-        bits = args.b
+        bits     = args.b
+        mi_est   = "quant_"+str(bits) if quantize else args.mi
 
         # Model
         _model = load_model(args.n)
-        Model = lambda: (_model(activation=args.af, quantize=quantize, num_bits=bits), quantize)
+        Model = lambda: (_model(activation=args.af, quantize=(quantize and bits<=16), num_bits=bits), (quantize and bits<=16))
         (lw,up) = get_activation_bound(args.af)
 
         if quantize:
-            MI_estimators = [
-                #QuantizedEstimator(bounds="neuron", bits=bits),
-                QuantizedEstimator(bounds="layer", bits=bits),
-                #QuantizedEstimator(bounds=(lw,up)),
-            ]
+            MI_estimators = [QuantizedEstimator(bounds="layer", bits=bits)]
         elif args.mi=="knn":
             MI_estimators = [KNNEstimator(k=10)]
-        else:
+        elif args.mi=="binning":
             MI_estimators = []
             for n_bins in [30, 100, 256]:
-                MI_estimators += [
-                    #BinningEstimator("uniform", n_bins=n_bins, bounds="neuron"),
-                    BinningEstimator("uniform", n_bins=n_bins, bounds="layer"),
-                    BinningEstimator("uniform", n_bins=n_bins, bounds="global"),
-                ]
-                if lw is not None and up is not None:
-                    MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds=(lw,up)))
-            MI_estimators += [
-                #QuantizedEstimator(bounds="neuron", bits=32),
-                QuantizedEstimator(bounds="layer", bits=32),
-            ]
-
-        #param_est = args.mi
-        #if param_est is None:
-            # Default
-        #    param_est = "binning_quantized" if quantize else "binning_uniform"
-        #if param_est=="all":
-        #    MI_estimator = [
-        #        ("binning_uniform_30", est.binning_uniform, {"n_bins":30, "upper":up, "lower":lw}),
-                #("binning_uniform_100", est.binning_uniform, {"n_bins":100, "upper":up, "lower":lw}),
-                #("binning_uniform_256", est.binning_uniform, {"n_bins":2**8, "upper":up, "lower":lw}),
-        #        ("binning_adaptive_30", est.binning_adaptive, {"n_bins":30}),
-                #("binning_adaptive_100", est.binning_adaptive, {"n_bins":100}),
-        #    ]
-        #else:
-            # MI_estimator
-        #    estimator = { 
-        #        "binning_uniform":   est.binning_uniform,
-        #        "binning_quantized": est.binning_quantized,
-        #        "binning_adaptive":  est.binning_adaptive,
-        #        "knn":               est.knn,
-        #    }.get(param_est, None)
-        #    est_args = {"n_bins":args.nb,"upper":up,"lower":lw}
-        #    MI_estimator = (param_est+"_"+str(args.nb),estimator,est_args)
+                MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="layer"))
 
         out_name = str(int(time())) if args.en is None else args.en
         out_path = args.o+("" if args.o[-1:]=="/" else "/")+out_name+"/"
@@ -79,7 +43,7 @@ if __name__ == '__main__':
         print("> model = '"+args.n+"', activation = '"+args.af+"'")
         print("> epochs = "+str(args.e)+", learning rate = "+str(args.lr))
         print("> quantization = "+("Yes" if args.q else "No"))
-        #print("> MI estimator ='"+param_est+"', number of bins = "+str(args.nb))
+        print("> MI estimator ='"+mi_est+"'")
         print("> repeats = "+str(args.r))
         # Write info to file as well 
         with open(out_path+"info.txt", "w") as info:
@@ -90,8 +54,7 @@ if __name__ == '__main__':
             info.write("quantization: "+("Yes" if args.q else "No")+"\n")
             info.write("bits:         "+str(args.b)+"\n")
             info.write("data:         "+str(args.d)+"\n")
-            #info.write("estimator:    "+str(args.mi)+"\n")
-            info.write("n_bins:       "+str(args.nb)+"\n")
+            info.write("estimator:    "+str(mi_est)+"\n")
             info.write("repeats:      "+str(args.r)+"\n")
 
         first_rep = args.sf
@@ -126,10 +89,7 @@ if __name__ == '__main__':
         elif args.type=="activations":
             IBplot.activations(path=in_path)
 
-    #def convert(args):
-    #    pass
-
-
+    
     parser = argparse.ArgumentParser(
         description="Run experiments for the Information Bottleneck in Deep Learning."
     )
@@ -151,9 +111,8 @@ if __name__ == '__main__':
     
     # Binning setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
-                            default=None, choices={"binning_uniform", "binning_adaptive", "knn", "all"},
+                            default="binning", choices={"binning", "knn"},
                             help="MI estimator.")
-    parser_exp.add_argument("-nb", metavar="BINS", type=int, default=30, help="Number of bins.")
 
     # Experiment setup
     parser_exp.add_argument("-d", metavar="DATA", type=str, default="tishby",
@@ -177,10 +136,6 @@ if __name__ == '__main__':
     parser_plot.add_argument("-o", metavar="PATH", type=str, default="out/",
                             help="Path to store outputs, default is 'out/'")
     parser_plot.set_defaults(func=plot)
-
-    ##### CONVERT
-    #parser_conv = subparsers.add_parser("convert", help="Convert output to various formats, e.g. pdflatex input")
-    #parser_conv.set_defaults(func=convert)
 
     args = parser.parse_args()
 

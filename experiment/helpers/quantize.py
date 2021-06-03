@@ -23,4 +23,4 @@ estimators = [QuantizedEstimator(bounds="layer", bits=bits)]
 res_path = "out/quantized_"+str(bits)+"bit/"+act_fun+"/"
 
 print("Starting binning experiment.")
-run_experiment(Model, estimators, epochs=10, repeats=repeats, out_path=res_path)
+run_experiment(Model, estimators, repeats=repeats, out_path=res_path)

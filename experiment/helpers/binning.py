@@ -24,4 +24,4 @@ for n_bins in [30,100,256]:
 res_path = "out/binning/"+act_fun+"/"
 
 print("Starting binning experiment.")
-run_experiment(Model, estimators, epochs=10, repeats=repeats, out_path=res_path)
+run_experiment(Model, estimators, repeats=repeats, out_path=res_path)

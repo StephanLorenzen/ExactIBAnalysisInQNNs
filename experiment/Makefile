@@ -4,6 +4,9 @@ experiments : clean link
 link:
 	ln -s ../IB IB
 
+data:
+	./helpers/get_data.sh
+
 # Run experiment
 binning:
 	python helpers/binning.py tanh

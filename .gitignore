@@ -5,6 +5,8 @@ experiment/out
 experiment/plots
 # experiment IB-link
 experiment/IB
+# experiment data
+experiment/data
 # Tex bi-files and outputs
 *.aux
 *.log

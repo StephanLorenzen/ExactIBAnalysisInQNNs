@@ -16,7 +16,7 @@ from .util import estimator
 def run_experiment(
         Model,
         MI_estimators,
-        data="tishby",
+        data,
         lr=10**-4,
         batch_size=256,
         epochs=8000,
@@ -94,11 +94,16 @@ def _zp(val):
 def prep_data(data, seed):
     # Load data
     print("Loading and preparing data...")
-    X,y = IBdata.load(data)
-    
-    X_train, X_test, y_train, y_test = IBdata.split(X,y,0.2,seed=seed)
-    y_train = tf.one_hot(y_train,2)
-    y_test  = tf.one_hot(y_test,2)
+    if data=="SYN":
+        X,y = IBdata.load(data)
+        X_train, X_test, y_train, y_test = IBdata.split(X,y,0.2,seed=seed)
+        y_train = tf.one_hot(y_train,2)
+        y_test  = tf.one_hot(y_test,2)
+    elif data=="MNIST":
+        X_train, X_test, y_train, y_test = IBdata.load_split(data)
+        y_train = tf.one_hot(y_train,10)
+        y_test  = tf.one_hot(y_test,10)
+        X,y = np.concatenate((X_train,X_test),axis=0), np.concatenate((y_train,y_test),axis=0)
     return (X_train, y_train), (X_test, y_test), (X,y)
 
 # Model training

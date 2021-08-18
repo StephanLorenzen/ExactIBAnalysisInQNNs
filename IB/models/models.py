@@ -45,7 +45,7 @@ def NN(layers, init=None, quantize=False, fixed_quant=False, num_bits=8):
         elif layer=="MaxPool2D":
             # l_info = ("MaxPool2D", kernel)
             kernel = l_info[1]
-            res = L.MaxPooling(kernel)
+            res = L.MaxPooling2D(kernel)
         elif layer=="Flatten":
             res = L.Flatten()
         
@@ -93,11 +93,11 @@ def FNN(layers, activation='tanh', init=None, quantize=False, fixed_quant=False,
 def ShwartzZiv99(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     return FNN([12,10,7,5,4,3,2], activation=activation, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
 
-def MNIST(init=None, quantize=False, fixed_quant=False, num_bits=8):
+def MNIST(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     k_init = _get_init(init)
     k_layers = []
     k_layers.append(('Input', (28,28,1)))
-    k_layers.append(("Conv2D"), 32, 'relu', (3,3))
+    k_layers.append(("Conv2D", 32, 'relu', (3,3)))
     k_layers.append(("MaxPool2D", (2,2)))
     k_layers.append(("Conv2D", 64, 'relu', (3,3)))
     k_layers.append(("MaxPool2D", (2,2)))

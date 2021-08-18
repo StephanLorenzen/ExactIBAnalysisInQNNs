@@ -98,8 +98,8 @@ if __name__ == '__main__':
     ##### EXPERIMENT
     parser_exp  = subparsers.add_parser("experiment", help="Run experiment")
     # Network setup
-    parser_exp.add_argument("-n", metavar="NETWORK", type=str, default="ShwartzZiv99",
-                            choices={"ShwartzZiv99"}, help="Network to use.")
+    parser_exp.add_argument("-n", metavar="NETWORK", type=str, default="SYN",
+                            choices={"SYN"}, help="Network to use.")
     parser_exp.add_argument("-af", metavar="ACT_FUNC", type=str, default="tanh",
                             choices={"tanh","relu","relu6"}, help="Activation function.")
     parser_exp.add_argument("-lr", type=float, default=10**-4,

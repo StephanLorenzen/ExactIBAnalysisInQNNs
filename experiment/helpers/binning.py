@@ -13,7 +13,7 @@ act_fun = sys.argv[1]
 repeats = 50
 
 # Model
-_model = load_model("shwartz_ziv_99")
+_model = load_model("ShwartzZiv99")
 Model = lambda: (_model(activation=act_fun, quantize=False), False)
 
 # MI estimators

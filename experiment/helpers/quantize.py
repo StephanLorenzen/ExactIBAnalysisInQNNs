@@ -14,7 +14,7 @@ bits    = int(sys.argv[2])
 repeats = 50 
 
 # Model
-_model = load_model("shwartz_ziv_99")
+_model = load_model("ShwartzZiv99")
 Model = lambda: (_model(activation=act_fun, quantize=(bits<=16), num_bits=bits), bits<=16)
 
 # MI estimators

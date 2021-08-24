@@ -49,17 +49,19 @@ def NN(layers, init=None, quantize=False, fixed_quant=False, num_bits=8):
         elif layer=="Flatten":
             res = L.Flatten()
         
-        if quantize and layer not in ("Input","MaxPool2D","Flatten"):
+        if quantize and layer!="Input":
             q_layer = tfmo.quantization.keras.quantize_annotate_layer
-            QC = {
-                4: IBQ.Default4BitConfig,
-                8: IBQ.Default8BitConfig,
-            }[num_bits]
-            if act == "tanh":
+            QC = lambda: None
+            if layer not in ("MaxPool2D","Flatten"):
                 QC = {
-                    4: IBQ.Tanh4BitConfig,
-                    8: IBQ.Tanh8BitConfig,
+                    4: IBQ.Default4BitConfig,
+                    8: IBQ.Default8BitConfig,
                 }[num_bits]
+                if act == "tanh":
+                    QC = {
+                        4: IBQ.Tanh4BitConfig,
+                        8: IBQ.Tanh8BitConfig,
+                    }[num_bits]
             res = q_layer(res, QC())
         return res
 

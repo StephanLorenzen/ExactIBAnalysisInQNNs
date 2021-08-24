@@ -105,10 +105,8 @@ class QuantizedEstimator(BaseEstimator):
             MI_XT = it.entropy(T)
             MI_TY = it.mutual_information(T,Y)
             MI_layers.append((MI_XT,MI_TY)) 
-        prev = 100
         return MI_layers
     
-
 def _knn_H(k, X, norm_p=math.inf):
     assert(norm_p==math.inf) # Not implemented for others
     N,d = X.shape

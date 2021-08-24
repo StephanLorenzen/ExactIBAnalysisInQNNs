@@ -96,15 +96,15 @@ def ShwartzZiv99(activation='tanh', init='truncated_normal', quantize=False, fix
     return FNN([12,10,7,5,4,3,2], activation=activation, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
 
 def MNIST(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
-    k_init = _get_init(init)
-    k_layers = []
-    k_layers.append(('Input', (28,28,1)))
-    k_layers.append(("Conv2D", 32, 'relu', (3,3)))
-    k_layers.append(("MaxPool2D", (2,2)))
-    k_layers.append(("Conv2D", 64, 'relu', (3,3)))
-    k_layers.append(("MaxPool2D", (2,2)))
-    k_layers.append(("Conv2D", 64, 'relu', (3,3)))
-    k_layers.append(("Flatten",))
-    k_layers.append(("Dense", 64, 'relu'))
-    k_layers.append(("Dense", 10, 'softmax'))
-    return NN(k_layers, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+    k_layers = [
+        ('Input', (28,28,1)),
+        ("Conv2D", 32, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 64, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 64, 'relu', (3,3)),
+        ("Flatten",),
+        ("Dense", 64, 'relu'),
+        ("Dense", 10, 'softmax')
+    ]
+    return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)

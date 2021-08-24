@@ -15,6 +15,8 @@ class BaseEstimator:
         return self._fname
     def setup(self, activations):
         return # Implement if needed
+    def require_setup(self):
+        return True; # Set to false if not needed
     def __call__(self, A, Y, X=None):
         raise Exception("Not implemented!")
 
@@ -82,7 +84,10 @@ class QuantizedEstimator(BaseEstimator):
         super().__init__("Quantized computation, "+bstr,"quantized_"+bstr)
         self.bounds = bounds
         self.bits = bits
-    
+   
+    def require_setup(self):
+        return False;
+
     def __call__(self, A, Y, X=None):
         MI_layers = []
         for i,layer in enumerate(A):
@@ -101,13 +106,6 @@ class QuantizedEstimator(BaseEstimator):
             MI_TY = it.mutual_information(T,Y)
             MI_layers.append((MI_XT,MI_TY)) 
         prev = 100
-        #for _, miy in MI_layers:
-        #    if miy > prev+10**-5:
-        #        print("Detected non-monotone MI(Y,T)")
-                #print(MI_layers)
-                #assert(False)
-                #import pdb; pdb.set_trace()
-        #    prev = miy
         return MI_layers
     
 

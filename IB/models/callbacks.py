@@ -4,11 +4,15 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 
 class TrainingTracker(keras.callbacks.Callback):
-    def __init__(self, X, info, quantized=False):
+    def __init__(self, X, info, estimators=None, quantized=False):
         super(TrainingTracker, self).__init__()
         self.data = X.astype(float)
         self.info = info
-        self.info["activations"] = []
+        self.estimators = estimators
+        if self.estimators is None:
+            self.info["activations"] = []
+        else:
+            self.info["MI"] = [[] for _ in self.estimators]
         self.info["max"] = []
         self.info["min"] = []
         self.quantized = quantized
@@ -24,8 +28,12 @@ class TrainingTracker(keras.callbacks.Callback):
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
             A.append(lA)
-       
-        self.info["activations"].append(A)
+        
+        if self.estimators is None:
+            self.info["activations"].append(A)
+        else:
+            for i,est in enumerate(self.estimators):
+                self.info["MI"][i].append(est(A))
         self.info["min"].append(mis)
         self.info["max"].append(mxs)
          

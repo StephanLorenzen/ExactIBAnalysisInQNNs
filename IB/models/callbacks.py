@@ -20,20 +20,26 @@ class TrainingTracker(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         skip_first = 1 if self.quantized else 0
         num_layers = len(self.model.layers)-skip_first
-        
         mis, mxs = [], []
-        A = []
+        if self.estimators is None:
+            A = []
+        else:
+            MIest = [[] for est in self.estimators]
         for i,l in enumerate(self.model.layers[skip_first:]):
             lA = K.function([self.model.inputs], [l.output])(self.data)[0]
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
-            A.append(lA)
-        
+            if self.estimators is None:
+                A.append(lA)
+            else:
+                for j,est in enumerate(self.estimators):
+                    MIest[j].append(est([lA])[0])
+
         if self.estimators is None:
             self.info["activations"].append(A)
         else:
-            for i,est in enumerate(self.estimators):
-                self.info["MI"][i].append(est(A))
+            for i,MI in enumerate(MIest):
+                self.info["MI"][i].append(MI)
         self.info["min"].append(mis)
         self.info["max"].append(mxs)
          

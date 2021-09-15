@@ -97,7 +97,8 @@ def ShwartzZiv99(activation='tanh', init='truncated_normal', quantize=False, fix
 
 def MNIST_FC(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     k_layers = [
-        ('Input', (28,28,1)),
+        ("Input", (28,28,1)),
+        ("Flatten",),
         ("Dense", 10, activation),
         ("Dense", 10, activation),
         ("Dense", 10, activation),

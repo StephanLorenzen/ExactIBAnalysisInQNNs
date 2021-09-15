@@ -28,7 +28,7 @@ else:
     _model = load_model(exp)
     dname  = exp
     Model  = lambda: (_model(quantize=(bits<=16), num_bits=bits), (bits<=16))
-    epochs = 2000
+    epochs = 20
 
 # MI estimators
 estimators = [QuantizedEstimator(bounds="layer", bits=bits)]

@@ -33,6 +33,7 @@ plot-quantize:
 	python helpers/plot.py quantize
 	cd helpers/latex; lualatex 8bit_relu
 	cd helpers/latex; lualatex 8bit_tanh
+	cd helpers/latex; lualatex 8bit_MNIST
 	cd helpers/latex; rm -f 8bit_*.{log,aux}; rm -rf quantize
 	mv helpers/latex/8bit_*.pdf plots/
 plot-accuracy:

@@ -6,12 +6,12 @@
 \input{setup.tex}
 
 \begin{document}
-\pgfplotstableread[col sep=comma]{quantize/SYN-ReLU/8/quantized_layer_8_bits.csv}\iplane
+\pgfplotstableread[col sep=comma]{quantize/MNIST/8/quantized_layer_8_bits.csv}\iplane
 
 \begin{tikzpicture}
 	\begin{groupplot}[group style={group size= 3 by 1, horizontal sep=2cm,vertical sep=0cm}]
-		\nextgroupplot[IB axis]
-			\addplot[IB plot] table[x=x,y=y]{\iplane};
+		\nextgroupplot[IB axis MNIST]
+			\addplot[IB plot REAL] table[x=x,y=y]{\iplane};
 		\nextgroupplot[IB axis,xmin=7.8,xmax=12.2,ymin=0.8,ymax=1.01,xticklabels={, ,8,9,10,11,12},yticklabels={, ,0.8, ,0.9, ,1.0},IB colorbar single]
 			\addplot[IB plot] table[x=x,y=y]{\iplane};
 	\end{groupplot}

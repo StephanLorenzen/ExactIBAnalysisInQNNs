@@ -12,24 +12,24 @@ EXP = sys.argv[1]
 
 OUT_DIR = "helpers/latex/"+EXP+"/"
 
-def latex_MI(act,est,data_path):
-    out_dir = OUT_DIR+act+"/"
+def latex_MI(est,out_dir,data_path):
+    out_dir = OUT_DIR+out_dir
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     out_file = out_dir+est+".csv"
     print("Creating MI plane file: '"+out_file+"'")
-    mean, std = iio.load_MI(data_path+act+"/",est)
+    mean, std = iio.load_MI(data_path,est)
     df  = {"x":[],"y":[],"c":[]}
     df_layer = dict([("X"+str(i),[]) for i in range(1,6+1)]+[("Y"+str(i),[]) for i in range(1,6+1)])
     # 8000 /  5 * 6 = 9600
-    mod = 5
+    mod = 5 if len(mean)>2000 else 1
     for epoch,mi in enumerate(mean):
         if epoch%mod != 0:
             continue
         df["c"] += [epoch/len(mean)]*len(mi)
         df["x"] += [x for x,_ in mi]
         df["y"] += [y for _,y in mi]
-
+    
     pd.DataFrame(df).to_csv(out_file,index_label="epoch")
 
 def latex_accuracy(acts,data_path,suffix=''):
@@ -61,8 +61,9 @@ if EXP=="binning":
         latex_MI("tanh","binning_uniform_"+str(nb)+"_global", "out/binning/")
 
 elif EXP=="quantize":
-    latex_MI("tanh", "quantized_layer_8_bits", "out/quantized_8bit/")
-    latex_MI("relu", "quantized_layer_8_bits", "out/quantized_8bit/")
+    latex_MI("quantized_layer_8_bits", "SYN-Tanh/8/", "out/quantized/SYN-Tanh/8/")
+    latex_MI("quantized_layer_8_bits", "SYN-ReLU/8/", "out/quantized/SYN-ReLU/8/")
+    latex_MI("quantized_layer_8_bits", "MNIST/8/",    "out/quantized/MNIST/8/")
 
 elif EXP=="accuracy":
     latex_accuracy(["relu","tanh"], "out/binning/", suffix="_binning")

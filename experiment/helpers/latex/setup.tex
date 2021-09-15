@@ -43,6 +43,38 @@ IB axis/.style={
 	ylabel={$I(X,T_i)$},
 	xlabel={$I(T_i,Y)$},
 },
+IB plot REAL/.style={
+    scatter,only marks,mark=none,
+    scatter/position=absolute,  
+    scatter/@pre marker code/.code={
+        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}] (pt-\pgfkeysvalueof{/data point/index}) at 
+    (\pgfkeysvalueof{/data point/x},\pgfkeysvalueof{/data point/y}){};},
+    scatter/@post marker code/.code={%
+    \ifnum\pgfkeysvalueof{/data point/index}=0
+    \else
+      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},8)} % 8 layers
+      \ifnum\itest=0
+      \else
+        \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
+        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}, opacity=0.15] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
+      \fi
+    \fi
+}},
+IB axis MNIST/.style={
+	height=0.7\linewidth,
+	width=0.7\linewidth,
+	colormap name=hot,
+	point meta min=1,
+	point meta max=300,	
+	ymajorgrids=true,
+	xmajorgrids=true,
+  %yticklabels={0.0,0.0,0.2,0.4,0.6,0.8,1.0},
+  %      xticklabels={,0,2,4,6,8,10,12},
+  %      ymin=0,ymax=1.03,
+	%xmin=0,xmax=12.36,
+	ylabel={$I(X,T_i)$},
+	xlabel={$I(T_i,Y)$},
+},
 IB colorbar single/.style={
    colorbar,
 },

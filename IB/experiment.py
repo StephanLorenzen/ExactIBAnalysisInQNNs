@@ -112,7 +112,7 @@ def prep_data(data, seed):
         X_train, X_test, y_train, y_test = IBdata.split(X,y,0.2,seed=seed)
         y_train = tf.one_hot(y_train,2)
         y_test  = tf.one_hot(y_test,2)
-    elif data=="MNIST":
+    elif data in ("MNIST","CIFAR"):
         X_train, X_test, y_train, y_test = IBdata.load_split(data)
         X,y = np.concatenate((X_train,X_test),axis=0), np.concatenate((y_train,y_test),axis=0)
         y_train = tf.one_hot(y_train,10)

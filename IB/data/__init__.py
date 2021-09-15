@@ -8,14 +8,16 @@ def load(dataset_name):
         raise Exception("Unknown data set: '"+dataset_name+"'")
     dataset = {
         'SYN':_load_tishby_data,
-        'MNIST':_load_MNIST
+        'MNIST':_load_MNIST,
+        'CIFAR':_load_CIFAR
     }[dataset_name]
     return dataset()
 def load_split(dataset_name):
     if dataset_name not in {'MNIST','CIFAR'}:
         raise Exception("Unknown data set: '"+dataset_name+"'")
     dataset = {
-        'MNIST':_load_MNIST_split
+        'MNIST':_load_MNIST_split,
+        'CIFAR':_load_CIFAR_split
     }[dataset_name]
     return dataset()
 
@@ -35,6 +37,29 @@ def _load_tishby_data():
     
     return X,y
 
+### CIFAR
+def _load_CIFAR():
+    X1,y1,X2,y2 = _load_CIFAR_split()
+    return np.concatenate((X1,X2),axis=0), np.concatenate((y1,y2),axis=0)
+def _load_CIFAR_split():
+    import pickle
+    Xs,ys = [],[]
+    for f in ["data_batch_"+str(i) for i in range(1,6)]:
+        with open("data/cifar/"+f, 'rb') as fo:
+            data = pickle.load(fo, encoding='bytes')
+        Xs.append(data[b'data'])
+        ys.append(data[b'labels'])
+    X_train = np.concatenate(Xs).reshape((-1,32,32,3))
+    y_train = np.concatenate(ys)
+    
+    with open("data/cifar/test_batch",'rb') as fo:
+        data = pickle.load(fo, encoding='bytes')
+    X_test = data[b'data'].reshape((-1,32,32,3))
+    y_test = data[b'labels']
+    
+    return X_train, X_test, y_train, y_test
+
+### MNIST
 def _load_MNIST():
     X1,y1,X2,y2 = _load_MNIST_split()
     return np.concatenate((X1,X2),axis=0), np.concatenate((y1,y2),axis=0)
@@ -44,8 +69,6 @@ def _load_MNIST_split():
     X_test, y_test   = _read_idx_file(path+".t", 28*28)
     X_train, X_test  = X_train.reshape((-1,28,28,1)), X_test.reshape((-1,28,28,1))
     return X_train, X_test, y_train, y_test
- 
-
 def _read_idx_file(path, d, sep=None):
     X = []
     Y = []

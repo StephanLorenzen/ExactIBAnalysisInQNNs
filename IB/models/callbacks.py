@@ -19,13 +19,14 @@ class TrainingTracker(keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         skip_first = 1 if self.quantized else 0
-        num_layers = len(self.model.layers)-skip_first
         mis, mxs = [], []
         if self.estimators is None:
             A = []
         else:
             MIest = [[] for est in self.estimators]
         for i,l in enumerate(self.model.layers[skip_first:]):
+            if "flatten" in l.name:
+                continue # Same neurons as previous layer - skip
             if self.estimators is None:
                 lA = K.function([self.model.inputs], [l.output])(self.data)[0]
             else:

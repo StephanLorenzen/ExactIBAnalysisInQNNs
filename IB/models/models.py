@@ -95,6 +95,17 @@ def FNN(layers, activation='tanh', init=None, quantize=False, fixed_quant=False,
 def ShwartzZiv99(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     return FNN([12,10,7,5,4,3,2], activation=activation, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
 
+def MNIST_FC(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+    k_layers = [
+        ('Input', (28,28,1)),
+        ("Dense", 10, activation),
+        ("Dense", 10, activation),
+        ("Dense", 10, activation),
+        ("Dense", 10, activation),
+        ("Dense", 10, 'softmax')
+    ]
+    return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+
 def MNIST(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     k_layers = [
         ('Input', (28,28,1)),
@@ -108,3 +119,61 @@ def MNIST(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8
         ("Dense", 10, 'softmax')
     ]
     return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+
+def MNIST_small(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+    k_layers = [
+        ('Input', (28,28,1)),
+        ("Conv2D", 2, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 1, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Flatten",),
+        ("Dense", 10, 'relu'),
+        ("Dense", 10, 'softmax')
+    ]
+    return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+
+def MNIST_small1(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+    k_layers = [
+        ('Input', (28,28,1)),
+        ("Conv2D", 8, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 8, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 8, 'relu', (3,3)),
+        ("Flatten",),
+        ("Dense", 16, 'relu'),
+        ("Dense", 10, 'softmax')
+    ]
+    return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+
+def CIFAR(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+    k_layers = [
+        ('Input', (32,32,1)),
+        ("Conv2D", 32, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("Conv2D", 32, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 64, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("Conv2D", 64, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("MaxPool2D", (2,2)),
+        ("Conv2D", 128, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("Conv2D", 128, 'elu', (3,3)),
+        #("BatchNormalization",)
+        ("MaxPool2D", (2,2)),
+        ("Flatten",),
+        ("Dense", 10, 'softmax')
+    ]
+    k_layers = [
+        ('Input', (32,32,3)),
+        ("Conv2D", 9, 'relu', (3,3)),
+        ("MaxPool2D", (2,2)),
+        ("Flatten",),
+        ("Dense", 10, 'softmax')
+    ]
+    return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
+

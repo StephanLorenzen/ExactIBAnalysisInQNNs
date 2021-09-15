@@ -26,7 +26,13 @@ class TrainingTracker(keras.callbacks.Callback):
         else:
             MIest = [[] for est in self.estimators]
         for i,l in enumerate(self.model.layers[skip_first:]):
-            lA = K.function([self.model.inputs], [l.output])(self.data)[0]
+            if self.estimators is None:
+                lA = K.function([self.model.inputs], [l.output])(self.data)[0]
+            else:
+                lA = []
+                for part in np.array_split(self.data, 10):
+                    lA.append(K.function([self.model.inputs], [l.output])(part)[0])
+                lA = np.concatenate(lA)
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
             if self.estimators is None:

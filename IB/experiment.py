@@ -117,6 +117,8 @@ def prep_data(data, seed):
         X,y = np.concatenate((X_train,X_test),axis=0), np.concatenate((y_train,y_test),axis=0)
         y_train = tf.one_hot(y_train,10)
         y_test  = tf.one_hot(y_test,10)
+    else:
+        raise Exception("Unknown data set: '"+data+"'")
     return (X_train, y_train), (X_test, y_test), (X,y)
 
 # Model training

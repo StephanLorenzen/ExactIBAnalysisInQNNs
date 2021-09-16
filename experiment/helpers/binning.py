@@ -12,8 +12,8 @@ if len(sys.argv)<2:
 exp     = sys.argv[1]
 repeats = int(sys.argv[2]) if len(sys.argv)>=3 else 50
 
-if exp not in ("MNIST","CIFAR","SYN-Tanh","SYN-ReLU"):
-    print("Experiment must be one of 'MNIST', 'CIFAR' or 'SYN-{Tanh,ReLU}'")
+if exp not in ("MNIST","MNIST-Tanh","MNIST-ReLU","CIFAR","SYN-Tanh","SYN-ReLU"):
+    print("Experiment must be one of 'MNIST[-{Tanh,ReLU}]', 'CIFAR' or 'SYN-{Tanh,ReLU}'")
     sys.exit(1)
 
 # Model
@@ -23,6 +23,12 @@ if exp[:3]=="SYN":
     dname   = "SYN"
     Model   = lambda: (_model(activation=act_fun, quantize=False), False)
     epochs  = 8000
+elif exp=="MNIST-Tanh" or exp=="MNIST-ReLU":
+    act_fun = exp[6:].lower()
+    _model  = load_model("MNIST-FC")
+    dname   = "MNIST"
+    Model   = lambda: (_model(activation=act_fun,quantize=False), False)
+    epochs  = 2000
 else:
     _model = load_model(exp)
     dname  = exp

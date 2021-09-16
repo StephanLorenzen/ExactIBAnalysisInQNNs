@@ -21,7 +21,7 @@ class BaseEstimator:
         raise Exception("Not implemented!")
 
 class BinningEstimator(BaseEstimator):
-    def __init__(self, strategy="uniform", n_bins=30, bounds="neuron"):
+    def __init__(self, strategy="uniform", n_bins=30, bounds="neuron", use_mean=False):
         assert(strategy in ("uniform","adaptive"))
         assert(type(n_bins)==int)
         assert(type(bounds)==tuple or bounds in ("global","layer","neuron"))
@@ -38,6 +38,7 @@ class BinningEstimator(BaseEstimator):
         self.bounds   = bounds
         
         self.bins     = None
+        self.mean     = use_mean
 
     def setup(self, activations):
         if self.fixed:
@@ -70,20 +71,21 @@ class BinningEstimator(BaseEstimator):
                 assert(self.bins is not None)
                 # Use precomputed bins
                 T = np.digitize(layer, self.bins)
-            MI_XT = it.entropy(T)
-            MI_TY = it.mutual_information(T,Y)
+            MI_XT = it.split_entropy(T) if self.mean else it.entropy(T)
+            MI_TY = it.split_mutual_information(T,Y) if self.mean else it.mutual_information(T,Y)
             MI_layers.append((MI_XT,MI_TY))
         
         return MI_layers
 
 class QuantizedEstimator(BaseEstimator):
-    def __init__(self, bounds="neuron", bits=8):
+    def __init__(self, bounds="neuron", bits=8, use_mean=False):
         assert(type(bounds)==tuple or bounds in ("layer","neuron"))
         bstr = bounds if type(bounds)==str else "fixed"
         bstr += "_"+str(bits)+"_bits"
         super().__init__("Quantized computation, "+bstr,"quantized_"+bstr)
         self.bounds = bounds
         self.bits = bits
+        self.mean = use_mean
    
     def require_setup(self):
         return False;
@@ -102,8 +104,8 @@ class QuantizedEstimator(BaseEstimator):
             elif self.bounds=="layer":
                 # Compute binning layer wise
                 T = binning.quantized(layer, bits=self.bits)
-            MI_XT = it.entropy(T)
-            MI_TY = it.mutual_information(T,Y)
+            MI_XT = it.split_entropy(T) if self.mean else it.entropy(T)
+            MI_TY = it.split_mutual_information(T,Y) if self.mean else it.mutual_information(T,Y)
             MI_layers.append((MI_XT,MI_TY)) 
         return MI_layers
     

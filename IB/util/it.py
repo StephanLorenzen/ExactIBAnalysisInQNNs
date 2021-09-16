@@ -19,3 +19,9 @@ def conditional_entropy(X,Y):
 
 def mutual_information(X,Y):
     return entropy(X)-conditional_entropy(X,Y)
+
+def split_entropy(X):
+    return np.apply_along_axis(entropy,0,X).mean()
+
+def split_mutual_information(X,Y):
+    return (np.apply_along_axis(entropy,0,X)-np.apply_along_axis(lambda x: conditional_entropy(x,Y),0,X)).mean()

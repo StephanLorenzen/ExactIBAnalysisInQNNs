@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
     def experiment(args):
         quantize = args.q
+        use_mean = args.um
         bits     = args.b
         mi_est   = "quant_"+str(bits) if quantize else args.mi
 
@@ -25,13 +26,13 @@ if __name__ == '__main__':
         (lw,up) = get_activation_bound(args.af)
 
         if quantize:
-            MI_estimators = [QuantizedEstimator(bounds="layer", bits=bits)]
+            MI_estimators = [QuantizedEstimator(bounds="layer", bits=bits, use_mean=args.um)]
         elif args.mi=="knn":
             MI_estimators = [KNNEstimator(k=10)]
         elif args.mi=="binning":
             MI_estimators = []
             for n_bins in [30, 100, 256]:
-                MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="layer"))
+                MI_estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="layer", use_mean=args.um))
 
         out_name = str(int(time())) if args.en is None else args.en
         out_path = args.o+("" if args.o[-1:]=="/" else "/")+out_name+"/"
@@ -108,13 +109,15 @@ if __name__ == '__main__':
                             help="Quantize the model (changes default binning strategy!).")
     parser_exp.add_argument("-b", metavar="BITS", type=int, default=8, help="Number of bits for quantization, if -q set, must be in (4,8).")
     
-    # Binning setup
+    # Estimator setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
                             default="binning", choices={"binning", "knn"},
                             help="MI estimator.")
+    parser_exp.add_argument("-um", action='store_const', const=True, default=False,
+                            help="Use mean of MI of neurons instead of MI of entire layer.")
 
     # Experiment setup
-    parser_exp.add_argument("-d", metavar="DATA", type=str, default="tishby",
+    parser_exp.add_argument("-d", metavar="DATA", type=str, default="SYN",
                             help="Data for experiment")
     parser_exp.add_argument("-r", metavar="REPEATS", type=int, default=10,
                             help="Number of experiment repeats")

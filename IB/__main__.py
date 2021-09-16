@@ -74,8 +74,7 @@ if __name__ == '__main__':
                 )
 
     def plot(args):
-        name = args.name
-        in_path = args.o+("/" if args.o[-1:]!="/" else "")+name+"/"
+        in_path = args.path+("/" if args.path[-1:]!="/" else "") #+name+"/"
         if not os.path.isdir(in_path):
             raise Exception("Unknown path or experiment: '"+in_path+"'")
         if args.type=="IB_plane":
@@ -130,11 +129,11 @@ if __name__ == '__main__':
     parser_plot = subparsers.add_parser("plot", help="Plot IB plane and other statistics")
     parser_plot.add_argument("type", metavar="TYPE", type=str,
                             help="Type of plot", choices={"IB_plane","MI_X","MI_Y","accuracy","activations"})
-    parser_plot.add_argument("name", metavar="NAME", type=str, help="Name of experiment")
+    parser_plot.add_argument("path", metavar="PATH", type=str, help="Path to experiment folder.")
     parser_plot.add_argument("-mi", metavar="ESTIMATOR", type=str, default="binning_uniform_30",
                             help="Name of estimator to plot for.")
-    parser_plot.add_argument("-o", metavar="PATH", type=str, default="out/",
-                            help="Path to store outputs, default is 'out/'")
+    #parser_plot.add_argument("-o", metavar="PATH", type=str, default="out/",
+    #                        help="Path to store outputs, default is 'out/'")
     parser_plot.set_defaults(func=plot)
 
     args = parser.parse_args()

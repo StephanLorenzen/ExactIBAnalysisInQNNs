@@ -36,6 +36,11 @@ class TrainingTracker(keras.callbacks.Callback):
                 lA = np.concatenate(lA)
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
+            if len(lA.shape)==2 and lA.shape[1]==2 and epoch%200==0:
+                # Two dimensional and flat -> store for plot
+                if "acts_2D" not in self.info:
+                    self.info["acts_2D"] = []
+                self.info["acts_2D"].append((epoch,lA))
             if self.estimators is None:
                 A.append(lA)
             else:

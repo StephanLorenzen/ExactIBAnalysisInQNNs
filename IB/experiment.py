@@ -37,7 +37,8 @@ def run_experiment(
     MI_path  = out_path+"mi/"
     acc_path = out_path+"accuracy/"
     act_path = out_path+"activations/"
-    for path in [MI_path, acc_path, act_path]:
+    _2D_path  = act_path+"2D/"
+    for path in [MI_path, acc_path, act_path, _2D_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
     
@@ -63,7 +64,6 @@ def run_experiment(
         ts = time()
         info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep) 
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
-
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
         for i,Est in enumerate(MI_estimators):
             path = MI_path+Est.dir()+"/"
@@ -86,6 +86,12 @@ def run_experiment(
             "test_acc":test_acc
         }).to_csv(acc_path+_zp(rep+1)+".csv", index_label="epoch")
         print(">> Storing activation info.")
+        if rep==0 and 'acts_2D' in info:
+            print(">>> Storing activations for 2D layer")
+            for epoch,dat in info['acts_2D']:
+                df = pd.DataFrame(dat, columns=["n1","n2"])
+                df["y"] = y;
+                df.to_csv(_2D_path+str(epoch)+".csv", index_label="i")
         col_layers = ["layer_"+str(i+1) for i in range(info["min"].shape[1])]
         pd.DataFrame(
             np.array(info["min"]),

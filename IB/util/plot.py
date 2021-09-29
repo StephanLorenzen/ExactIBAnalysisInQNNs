@@ -32,16 +32,17 @@ def mi(var, repeats=None, path=None, est=None):
     for MIs in repeats:
         for i,(XT,TY) in enumerate(MIs):
             ys[i].append(TY if var.lower()=='y' else XT)
-    for y in ys:
-        plt.plot(x,y)
+    for i,y in enumerate(ys):
+        plt.plot(x,y,label="Layer "+str(i+1))
+    plt.legend()
     plt.show()
 
 def accuracy(path=None):
     if path is None:
         raise Exception("Missing path...")
     train, test = IBio.load_accuracy(path)
-    train,_ = train
-    test, _ = test
+    train,_,_ = train
+    test,_,_ = test
     num_epochs = len(train)
     assert(len(test)==num_epochs)
     epochs = list(range(num_epochs))

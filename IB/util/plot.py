@@ -71,3 +71,7 @@ def activations(path=None):
     plt.show()
 
 
+def activations_2D(path=None):
+    assert path!=None, "Path is missing..."
+    dfs = IBio.load_activations_2D(path)
+    import pdb; pdb.set_trace()

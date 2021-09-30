@@ -98,3 +98,17 @@ def load_activations(path):
 
     return (max_mean, max_std), (min_mean, min_std)
 
+def load_activations_2D(path):
+    assert os.path.isdir(path), "Directory does not exists '"+path+"'"
+    def _zp(val):
+        val = str(val)
+        return "0"*(3-len(val)) + val
+    l = None
+    dfs = []
+    act_path = path+"activations/2D/"
+    for f in ["1000","2000","2800"]: # TODO
+        dfs.append(pd.read_csv(act_path+f+".csv"))
+
+    return dfs
+
+

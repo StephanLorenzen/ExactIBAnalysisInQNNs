@@ -4,7 +4,7 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 
 class TrainingTracker(keras.callbacks.Callback):
-    def __init__(self, X, info, estimators=None, quantized=False):
+    def __init__(self, X, info, estimators=None, quantized=False, model_save_path=None):
         super(TrainingTracker, self).__init__()
         self.data = X.astype(float)
         self.info = info
@@ -16,6 +16,7 @@ class TrainingTracker(keras.callbacks.Callback):
         self.info["max"] = []
         self.info["min"] = []
         self.quantized = quantized
+        self.model_save_path = model_save_path
 
     def on_epoch_end(self, epoch, logs=None):
         skip_first = 1 if self.quantized else 0
@@ -36,11 +37,13 @@ class TrainingTracker(keras.callbacks.Callback):
                 lA = np.concatenate(lA)
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
-            if len(lA.shape)==2 and lA.shape[1]==2 and epoch%200==0:
+            if len(lA.shape)==2 and lA.shape[1]==2 and (epoch+1)%200==0:
                 # Two dimensional and flat -> store for plot
                 if "acts_2D" not in self.info:
                     self.info["acts_2D"] = []
                 self.info["acts_2D"].append((epoch,lA))
+                if self.model_save_path!=None:
+                    self.model.save(self.model_save_path+str(epoch+1))
             if self.estimators is None:
                 A.append(lA)
             else:

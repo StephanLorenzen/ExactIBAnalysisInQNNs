@@ -38,7 +38,8 @@ def run_experiment(
     acc_path = out_path+"accuracy/"
     act_path = out_path+"activations/"
     _2D_path  = act_path+"2D/"
-    for path in [MI_path, acc_path, act_path, _2D_path]:
+    model_path = out_path+"models/"
+    for path in [MI_path, acc_path, act_path, _2D_path, model_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
     
@@ -62,7 +63,7 @@ def run_experiment(
         # Train and get activations
         print(">> Fitting model, "+str(epochs)+" epochs")
         ts = time()
-        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep) 
+        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep, model_save_path=model_path if rep==0 else None) 
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
         for i,Est in enumerate(MI_estimators):
@@ -128,7 +129,7 @@ def prep_data(data, seed):
     return (X_train, y_train), (X_test, y_test), (X,y)
 
 # Model training
-def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimators=None, seed=None):
+def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimators=None, seed=None, model_save_path=None):
     model, quantized = Model()
     
     X_train,y_train = train_data
@@ -149,7 +150,7 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimat
     info = dict()
    
     # Callback
-    callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized)
+    callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized, model_save_path=model_save_path)
     hist = model.fit(
             X_train,
             y_train,

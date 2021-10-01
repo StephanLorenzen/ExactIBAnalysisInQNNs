@@ -106,9 +106,9 @@ def load_activations_2D(path):
     l = None
     dfs = []
     act_path = path+"activations/2D/"
-    for f in ["1000","2000","2800"]: # TODO
-        dfs.append(pd.read_csv(act_path+f+".csv"))
-
+    for f in os.listdir(act_path):
+        es = f.split(".")[0]
+        dfs.append((es,pd.read_csv(act_path+f, index_col="i")))
     return dfs
 
 

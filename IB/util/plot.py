@@ -74,4 +74,12 @@ def activations(path=None):
 def activations_2D(path=None):
     assert path!=None, "Path is missing..."
     dfs = IBio.load_activations_2D(path)
-    import pdb; pdb.set_trace()
+    colors = ["darkorange","darkgreen","red","blue","yellow","black","purple","green","pink","orange"]
+    
+    epoch,df = dfs[-1]
+    for i,c in enumerate(colors):
+        df2 = df[df["y"]==i]
+        plt.scatter(df2["n1"].values,df2["n2"].values,c=c,s=3,label=str(i))
+    plt.legend()
+    plt.show()
+

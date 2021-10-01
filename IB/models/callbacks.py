@@ -17,6 +17,7 @@ class TrainingTracker(keras.callbacks.Callback):
         self.info["min"] = []
         self.quantized = quantized
         self.model_save_path = model_save_path
+        self.save_epochs = set(list(range(1,10+1))+list(range(10,101,10))+list(range(200,8001,200)))
 
     def on_epoch_end(self, epoch, logs=None):
         skip_first = 1 if self.quantized else 0
@@ -37,7 +38,7 @@ class TrainingTracker(keras.callbacks.Callback):
                 lA = np.concatenate(lA)
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
-            if len(lA.shape)==2 and lA.shape[1]==2 and (epoch+1)%200==0:
+            if len(lA.shape)==2 and lA.shape[1]==2 and (epoch+1) in self.save_epochs:
                 # Two dimensional and flat -> store for plot
                 if "acts_2D" not in self.info:
                     self.info["acts_2D"] = []

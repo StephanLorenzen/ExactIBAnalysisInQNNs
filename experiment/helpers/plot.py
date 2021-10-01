@@ -40,7 +40,7 @@ def latex_accuracy(acts,data_path,suffix=''):
     print("Creating '"+out_file+"'")
     df = dict()
     for act in acts:
-        train, test = iio.load_accuracy(data_path+act+"/")
+        train, test = iio.load_accuracy(data_path)
         df[act+"_train_mean"] = train[0]
         df[act+"_train_std"] = train[1]
         df[act+"_train_up"] = train[0]+train[2]

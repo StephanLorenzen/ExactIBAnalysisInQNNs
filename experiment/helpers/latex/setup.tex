@@ -52,7 +52,7 @@ IB plot REAL/.style={
     scatter/@post marker code/.code={%
     \ifnum\pgfkeysvalueof{/data point/index}=0
     \else
-      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},8)} % 8 layers
+      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},5)} % 5 layers
       \ifnum\itest=0
       \else
         \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
@@ -72,8 +72,8 @@ IB axis MNIST/.style={
   %      xticklabels={,0,2,4,6,8,10,12},
   %      ymin=0,ymax=1.03,
 	%xmin=0,xmax=12.36,
-	ylabel={$I(T_i,X)$},
-	xlabel={$I(Y,T_i)$},
+	ylabel={$I(T_i,Y)$},
+	xlabel={$I(X,T_i)$},
 },
 IB colorbar single/.style={
    colorbar,

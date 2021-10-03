@@ -8,52 +8,61 @@ data:
 	./helpers/get_data.sh
 
 # Run experiment
-binning:
-	python helpers/binning.py tanh
-	python helpers/binning.py relu
 quantize:
-	python helpers/quantize.py tanh 8
-	python helpers/quantize.py relu 8
+	python helpers/quantize.py SYN-Tanh 8
+	python helpers/quantize.py SYN-ReLU 8
+MNIST-Bottleneck:
+	python helpers/quantize.py MNIST-Bottleneck 8 20
+binning:
+	python helpers/binning.py SYN-Tanh
+	python helpers/binning.py SYN-ReLU
 quantize-extra:
-	python helpers/quantize.py tanh 4
-	python helpers/quantize.py relu 4
-	python helpers/quantize.py tanh 32
-	python helpers/quantize.py relu 32
+	python helpers/quantize.py SYN-Tanh 4
+	python helpers/quantize.py SYN-ReLU 4
+	python helpers/quantize.py SYN-Tanh 32
+	python helpers/quantize.py SYN-ReLU 32
+	python helpers/quantize.py MNIST-10 8 20
 
 # Create latex plots
-plot-binning:
-	mkdir -p plots
-	python helpers/plot.py binning
-	cd helpers/latex; lualatex binning_relu
-	cd helpers/latex; lualatex binning_tanh
-	cd helpers/latex; rm -f binning_*.{log,aux}; rm -rf binning
-	mv helpers/latex/binning_*.pdf plots/
 plot-quantize:
 	mkdir -p plots
 	python helpers/plot.py quantize
-	cd helpers/latex; lualatex 8bit_relu
-	cd helpers/latex; lualatex 8bit_tanh
-	cd helpers/latex; lualatex 8bit_MNIST
-	cd helpers/latex; rm -f 8bit_*.{log,aux}; rm -rf quantize
-	mv helpers/latex/8bit_*.pdf plots/
-plot-accuracy:
+	# I-planes
+	cd helpers/latex; lualatex SYN_8b_ReLU_IP
+	cd helpers/latex; lualatex SYN_8b_Tanh_IP
+	# Accuarcy
+	cd helpers/latex; lualatex SYN_accuracy
+	# Clean and move
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -rf quantize
+	mv helpers/latex/SYN_*.pdf plots/
+plot-MNIST-Bottleneck:
+	python helpers/plot.py MNIST-Bottleneck
+	cd helpers/latex; lualatex REAL_8b_BN_IP_accuracy
+	cd helpers/latex; lualatex REAL_8b_BN_scatter
+	# Clean and move
+	cd helpers/latex; rm -f REAL_8b_BN_*.{log,aux}; rm -rf MNIST-Bottleneck
+	mv helpers/latex/REAL_8b_BN_*.pdf plots/
+plot-binning:
 	mkdir -p plots
-	python helpers/plot.py accuracy
-	cd helpers/latex; lualatex accuracy 
-	cd helpers/latex; rm -f accuracy.{log,aux}; rm -rf accuracy
-	mv helpers/latex/accuracy.pdf plots/
+	python helpers/plot.py binning
+	cd helpers/latex; lualatex SYN_bin_ReLU_IP
+	cd helpers/latex; lualatex SYN_bin_Tanh_IP
+	cd helpers/latex; rm -f SYN_bin_*.{log,aux}; rm -rf binning
+	mv helpers/latex/SYN_bin_*.pdf plots/
 plot-quantize-extra:
 	mkdir -p plots
 	python helpers/plot.py quantize-extra
-	cd helpers/latex; lualatex 4bit
-	cd helpers/latex; lualatex 4bit_accuracy
-	cd helpers/latex; lualatex 32bit
-	cd helpers/latex; lualatex 32bit_accuracy
-	cd helpers/latex; rm -f 4bit*.{log,aux}; rm -f 32bit*.{log,aux}; rm -rf quantize-extra
-	mv helpers/latex/{4,32}bit*.pdf plots/
+	cd helpers/latex; lualatex SYN_4b_IP
+	cd helpers/latex; lualatex SYN_4b_accuracy
+	cd helpers/latex; lualatex SYN_32b_IP
+	cd helpers/latex; lualatex SYN_32b_accuracy
+	cd helpers/latex; lualatex REAL_8b_10_IP_accuracy
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_8b_10_IP_accuracy.{log,aux}; rm -rf quantize-extra
+	mv helpers/latex/SYN_{4,32}b_*.pdf plots/
+	mv helpers/latex/REAL_8b_10_IP_accuracy.pdf plots/
 
 # Clean
 clean:
 	rm -f IB
-	rm -rf out
+	#rm -rf out
 	rm -rf plots

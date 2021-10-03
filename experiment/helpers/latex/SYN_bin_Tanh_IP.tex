@@ -6,9 +6,9 @@
 \input{setup.tex}
 
 \begin{document}
-\pgfplotstableread[col sep=comma]{binning/tanh/binning_uniform_30_global.csv}\iplaneA
-\pgfplotstableread[col sep=comma]{binning/tanh/binning_uniform_100_global.csv}\iplaneB
-\pgfplotstableread[col sep=comma]{binning/tanh/binning_uniform_256_global.csv}\iplaneC
+\pgfplotstableread[col sep=comma]{binning/SYN-Tanh/binning_uniform_30_global.csv}\iplaneA
+\pgfplotstableread[col sep=comma]{binning/SYN-Tanh/binning_uniform_100_global.csv}\iplaneB
+\pgfplotstableread[col sep=comma]{binning/SYN-Tanh/binning_uniform_256_global.csv}\iplaneC
 
 \begin{tikzpicture}
 	\begin{groupplot}[group style={group size= 3 by 1, horizontal sep=0cm,vertical sep=0cm}]

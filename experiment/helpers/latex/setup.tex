@@ -6,6 +6,9 @@
 \definecolor{colTanh}{rgb}{0,0.5,0}
 \definecolor{colRelu}{rgb}{0.5, 0, 0}
 
+\definecolor{colTrain}{rgb}{0,0.5,0}
+\definecolor{colTest}{rgb}{0.5, 0, 0}
+
 \pgfplotsset{
 compat=1.16,
 /pgfplots/colormap={info_plane}{
@@ -65,7 +68,7 @@ IB axis MNIST/.style={
 	width=0.7\linewidth,
 	colormap name=hot,
 	point meta min=1,
-	point meta max=300,	
+	point meta max=3000,	
 	ymajorgrids=true,
 	xmajorgrids=true,
   %yticklabels={0.0,0.0,0.2,0.4,0.6,0.8,1.0},

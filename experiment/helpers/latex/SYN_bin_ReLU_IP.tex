@@ -12,15 +12,12 @@
 
 \begin{tikzpicture}
 	\begin{groupplot}[group style={group size= 3 by 1, horizontal sep=0cm,vertical sep=0cm}]
-		\nextgroupplot[IB axis,xticklabels={,0,2,4,6,8,10}]
+		\nextgroupplot[IB axis,title=30 bins,xticklabels={,0,2,4,6,8,10}]
 			\addplot[IB plot] table[x=x,y=y]{\iplaneA};
-			\node[IB text] at (axis cs: 9,0.04) {30 bins};
-		\nextgroupplot[IB axis,IB noY,xticklabels={,0,2,4,6,8,10}]
+		\nextgroupplot[IB axis,title=100 bins,IB noY,xticklabels={,0,2,4,6,8,10}]
 			\addplot[IB plot] table[x=x,y=y]{\iplaneB};
-			\node[IB text] at (axis cs: 9,0.04) {100 bins};
-		\nextgroupplot[IB axis,IB noY,IB colorbar single]
+		\nextgroupplot[IB axis,title=256 bins,IB noY,IB colorbar single]
 			\addplot[IB plot] table[x=x,y=y]{\iplaneC};
-			\node[IB text] at (axis cs: 9,0.04) {256 bins};
 	\end{groupplot}
 \end{tikzpicture}
 

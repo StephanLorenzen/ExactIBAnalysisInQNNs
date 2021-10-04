@@ -56,45 +56,28 @@ def latex_accuracy(out_suf,data_path):
     df = df.iloc[::reduce]
     df.to_csv(out_file,index_label="epoch")
 
-def latex_2D(epochs,data_path,subdir):
-    out_dir = OUT_DIR+subdir
-    if not os.path.isdir(out_dir):
-        os.makedirs(out_dir)
-    dfs = dict(iio.load_activations_2D(data_path))
-    for epoch in epochs:
-        assert str(epoch) in dfs or str(epoch-1) in dfs, "Missing: "+str(epoch)+" in "+data_path
-        df = dfs.get(str(epoch),dfs[str(epoch-1)])
-        df.to_csv(out_dir+str(epoch)+".csv", index_label="i")
-
-
 if EXP=="binning":
     for nb in [30,100,256]:
         latex_MI("binning_uniform_"+str(nb)+"_global", "SYN-Tanh/", "out/binning/SYN-Tanh/")
         latex_MI("binning_uniform_"+str(nb)+"_global", "SYN-ReLU/", "out/binning/SYN-ReLU/")
 
 elif EXP=="quantize":
-    # Plots for 8-bit quantized synthetic experiments: Tanh and ReLU, I-plane, accuracy
-    latex_MI("quantized_layer_8_bits", "SYN-Tanh/", "out/quantized/SYN-Tanh/8/")
-    latex_MI("quantized_layer_8_bits", "SYN-ReLU/", "out/quantized/SYN-ReLU/8/")
-    latex_accuracy("SYN-Tanh/", "out/binning/SYN-Tanh/")
-    latex_accuracy("SYN-ReLU/", "out/binning/SYN-ReLU/")
-    latex_accuracy("SYN-Tanh/", "out/quantized/SYN-Tanh/8/")
-    latex_accuracy("SYN-ReLU/", "out/quantized/SYN-ReLU/8/")
+    b = "8"
+    latex_MI("quantized_layer_"+b+"_bits", "SYN-Tanh/"+b+"/", "out/quantized/SYN-Tanh/"+b+"/")
+    latex_MI("quantized_layer_"+b+"_bits", "SYN-ReLU/"+b+"/", "out/quantized/SYN-ReLU/"+b+"/")
+    latex_MI("quantized_layer_8_bits", "MNIST-BN/", "out/quantized/MNIST-Bottleneck/8/")
 
-elif EXP=="MNIST-Bottleneck":
-    # Plots for MNIST bottleneck: 2D plot, I-plane, accuracy
-    latex_2D([200,1000,3000], "out/quantized/MNIST-Bottleneck-old/8/", "2D/")
-    latex_MI("quantized_layer_8_bits", "", "out/quantized/MNIST-Bottleneck-old/8/")
-    latex_accuracy("", "out/quantized/MNIST-Bottleneck-old/8/")
+elif EXP=="accuracy":
+    latex_accuracy("SYN-Tanh/bin/", "out/binning/SYN-Tanh/")
+    latex_accuracy("SYN-ReLU/bin/", "out/binning/SYN-ReLU/")
+    for b in ["4","8","32"]:
+        latex_accuracy("SYN-Tanh/"+b+"/", "out/quantized/SYN-Tanh/"+b+"/")
+        latex_accuracy("SYN-ReLU/"+b+"/", "out/quantized/SYN-ReLU/"+b+"/")
 
 elif EXP=="quantize-extra":
     # Plots for 4,32-bit quantized synthetic experiments: Tanh and ReLU, I-plane, accuracy
     for b in ["4","32"]:
         latex_MI("quantized_layer_"+b+"_bits", "SYN-Tanh/"+b+"/", "out/quantized/SYN-Tanh/"+b+"/")
         latex_MI("quantized_layer_"+b+"_bits", "SYN-ReLU/"+b+"/", "out/quantized/SYN-ReLU/"+b+"/")
-        latex_accuracy("SYN-Tanh/"+b+"/", "out/quantized/SYN-Tanh/"+b+"/")
-        latex_accuracy("SYN-ReLU/"+b+"/", "out/quantized/SYN-ReLU/"+b+"/")
-    # Plots for 8-bit quantized MNIST-10 experiment: I-plane, accuracy
     latex_MI("quantized_layer_8_bits", "MNIST-10/", "out/quantized/MNIST-10/8/")
-    latex_accuracy("MNIST-10/", "out/quantized/MNIST-10/8/")
 

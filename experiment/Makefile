@@ -11,7 +11,6 @@ data:
 quantize:
 	python helpers/quantize.py SYN-Tanh 8
 	python helpers/quantize.py SYN-ReLU 8
-MNIST-Bottleneck:
 	python helpers/quantize.py MNIST-Bottleneck 8 20
 binning:
 	python helpers/binning.py SYN-Tanh
@@ -30,18 +29,11 @@ plot-quantize:
 	# I-planes
 	cd helpers/latex; lualatex SYN_8b_ReLU_IP
 	cd helpers/latex; lualatex SYN_8b_Tanh_IP
-	# Accuarcy
-	cd helpers/latex; lualatex SYN_accuracy
+	cd helpers/latex; lualatex REAL_8b_BN_IP
 	# Clean and move
-	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -rf quantize
-	mv helpers/latex/SYN_*.pdf plots/
-plot-MNIST-Bottleneck:
-	python helpers/plot.py MNIST-Bottleneck
-	cd helpers/latex; lualatex REAL_8b_BN_IP_accuracy
-	cd helpers/latex; lualatex REAL_8b_BN_scatter
-	# Clean and move
-	cd helpers/latex; rm -f REAL_8b_BN_*.{log,aux}; rm -rf MNIST-Bottleneck
-	mv helpers/latex/REAL_8b_BN_*.pdf plots/
+	cd helpers/latex; rm -f SYN_8b_*.{log,aux}; rm -f REAL_8b_BN_IP.{log,aux}; rm -rf quantize
+	mv helpers/latex/SYN_8b_*.pdf plots/
+	mv helpers/latex/REAL_8b_BN_IP.pdf plots/
 plot-binning:
 	mkdir -p plots
 	python helpers/plot.py binning
@@ -53,13 +45,18 @@ plot-quantize-extra:
 	mkdir -p plots
 	python helpers/plot.py quantize-extra
 	cd helpers/latex; lualatex SYN_4b_IP
-	cd helpers/latex; lualatex SYN_4b_accuracy
 	cd helpers/latex; lualatex SYN_32b_IP
-	cd helpers/latex; lualatex SYN_32b_accuracy
-	cd helpers/latex; lualatex REAL_8b_10_IP_accuracy
-	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_8b_10_IP_accuracy.{log,aux}; rm -rf quantize-extra
+	cd helpers/latex; lualatex REAL_8b_10_IP
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_8b_10_IP.{log,aux}; rm -rf quantize-extra
 	mv helpers/latex/SYN_{4,32}b_*.pdf plots/
-	mv helpers/latex/REAL_8b_10_IP_accuracy.pdf plots/
+	mv helpers/latex/REAL_8b_10_IP.pdf plots/
+plot-accuracy:
+	mkdir -p plots
+	python helpers/plot.py accuracy
+	cd helpers/latex; lualatex SYN_Tanh_accuracy
+	cd helpers/latex; lualatex SYN_ReLU_accuracy
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -rf accuracy
+	mv helpers/latex/SYN_*.pdf plots/
 
 # Clean
 clean:

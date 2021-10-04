@@ -6,7 +6,7 @@
 \input{setup.tex}
 
 \begin{document}
-\pgfplotstableread[col sep=comma]{quantize/SYN-Tanh/quantized_layer_8_bits.csv}\iplane
+\pgfplotstableread[col sep=comma]{quantize/SYN-Tanh/8/quantized_layer_8_bits.csv}\iplane
 
 \begin{tikzpicture}
 	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=2cm,vertical sep=0cm}]

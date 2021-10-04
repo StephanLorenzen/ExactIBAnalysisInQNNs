@@ -1,0 +1,87 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+\pgfplotstableread[col sep=comma]{accuracy/SYN-ReLU/4/accuracy.csv}\accA
+\pgfplotstableread[col sep=comma]{accuracy/SYN-ReLU/8/accuracy.csv}\accB
+\pgfplotstableread[col sep=comma]{accuracy/SYN-ReLU/32/accuracy.csv}\accC
+\pgfplotstableread[col sep=comma]{accuracy/SYN-ReLU/bin/accuracy.csv}\accD
+\pgfplotsset{
+acc axis/.style={
+	xmin=0,xmax=8000,
+	ymin=0.8,ymax=1,
+	legend style={ at={(0.9,0.1)}, anchor=south east },
+	xlabel={Epoch},
+	ylabel={Accuracy},
+  ymajorgrids=true,
+},
+}
+
+\begin{tikzpicture}
+	\begin{groupplot}[group style={group size= 4 by 1, horizontal sep=0cm,vertical sep=0cm}]
+	  \nextgroupplot[acc axis,title=4 bits]
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accA};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accA};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accA};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accA};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accA};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accA};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+	  
+    \nextgroupplot[acc axis,title=8 bits,IB noY]
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accB};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accB};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accB};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accB};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accB};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accB};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+    
+    \nextgroupplot[acc axis,title=32 bits,IB noY]
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accC};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accC};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accC};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accC};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accC};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accC};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+    
+    \nextgroupplot[acc axis,title=Non-quantized,IB noY, legend style={at={(0.85,0.1)}}]
+		% Legend
+		\addlegendimage{no markers,colTrain}
+		\addlegendentry{Train}
+		\addlegendimage{no markers,dashed,colTest}
+		\addlegendentry{Test}
+
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accD};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accD};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accD};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accD};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accD};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accD};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

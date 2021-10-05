@@ -11,9 +11,9 @@
 
 \begin{tikzpicture}
 	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=2cm,vertical sep=0cm}]
-		\nextgroupplot[IB axis, title=\tanh]
+		\nextgroupplot[IB axis, title=\tanh, xmin=7, ymin=0.6]
 			\addplot[IB plot] table[x=x,y=y]{\iplaneTanh};
-		\nextgroupplot[IB axis, title=\relu, IB colorbar single]
+		\nextgroupplot[IB axis, title=\relu, IB colorbar single, xmin=7, ymin=0.6]
 			\addplot[IB plot] table[x=x,y=y]{\iplaneRelu};
 	\end{groupplot}
 \end{tikzpicture}

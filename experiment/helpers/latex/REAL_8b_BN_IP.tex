@@ -9,11 +9,22 @@
 \usepgfplotslibrary{fillbetween}
 \pgfplotstableread[col sep=comma]{quantize/MNIST-BN/quantized_layer_8_bits.csv}\iplane
 
-\begin{tikzpicture}
+\begin{tikzpicture}[
+    compression/.style={
+      ->,
+      line width=2pt,
+      color=black,
+    }
+  ]
 	\begin{groupplot}[group style={group size= 1 by 1, horizontal sep=3cm,vertical sep=0cm}]
 		\nextgroupplot[IB axis MNIST,IB colorbar single]
 			\addplot[IB plot REAL] table[x=x,y=y]{\iplane};
 	\end{groupplot}
+
+  % Compression arrow, layer -1
+	\node (cs1) at (3.3,5.1){};
+       	\node (cd1) at (2.4,5.7){};
+	\draw[compression](cs1) -- node[anchor=center, above=3mm] {\bf\small Compression in 2D layer} (cd1);
 \end{tikzpicture}
 
 \end{document}

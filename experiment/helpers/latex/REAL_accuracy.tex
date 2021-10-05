@@ -1,0 +1,53 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+\usepgfplotslibrary{fillbetween}
+
+\begin{document}
+\pgfplotstableread[col sep=comma]{accuracy/MNIST-BN/accuracy.csv}\accA
+\pgfplotstableread[col sep=comma]{accuracy/MNIST-10/accuracy.csv}\accB
+\pgfplotsset{
+acc axis/.style={
+	xmin=0,xmax=3000,
+	ymin=0.4,ymax=1,
+	legend style={ at={(0.9,0.1)}, anchor=south east },
+	xlabel={Epoch},
+	ylabel={Accuracy},
+  ymajorgrids=true,
+},
+}
+
+\begin{tikzpicture}
+	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=0cm,vertical sep=0cm}]
+    \nextgroupplot[acc axis,title=Bottleneck network,xtick={0,1000,2000}]
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accA};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accA};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accA};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accA};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accA};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accA};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+	  
+    \nextgroupplot[acc axis,title=Complex network,IB noY,xtick={0,1000,2000,3000}]
+		% Train
+		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accB};
+		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accB};
+		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accB};
+		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
+		
+		% Test
+		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accB};
+		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accB};
+		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accB};
+		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

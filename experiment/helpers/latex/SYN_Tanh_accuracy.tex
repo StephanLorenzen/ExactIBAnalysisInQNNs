@@ -19,6 +19,7 @@ acc axis/.style={
 	xlabel={Epoch},
 	ylabel={Accuracy},
   ymajorgrids=true,
+  xtick={0,2000,4000,6000}
 },
 }
 
@@ -63,7 +64,13 @@ acc axis/.style={
 		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accC};
 		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
     
-    \nextgroupplot[acc axis,title=Non-quantized,IB noY, legend style={at={(0.85,0.1)}}]
+    \nextgroupplot[
+      acc axis,
+      title=Non-quantized,
+      IB noY,
+      legend style={at={(0.85,0.1)}},
+      xtick={0,2000,4000,6000,8000}
+    ]
 		% Legend
 		\addlegendimage{no markers,colTrain}
 		\addlegendentry{Train}

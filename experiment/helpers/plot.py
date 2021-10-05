@@ -25,7 +25,7 @@ def latex_MI(est,out_suf,data_path):
         std = std[:3000]
     # 8000 / 5 * 6 = 9600
     # 3000 / 2 * 5 = 7500
-    mod = 5 if len(mean)>6000 else 1
+    mod = 5 if len(mean)>6000 else 2
     for epoch,mi in enumerate(mean):
         if epoch%mod != 0:
             continue
@@ -73,6 +73,8 @@ elif EXP=="accuracy":
     for b in ["4","8","32"]:
         latex_accuracy("SYN-Tanh/"+b+"/", "out/quantized/SYN-Tanh/"+b+"/")
         latex_accuracy("SYN-ReLU/"+b+"/", "out/quantized/SYN-ReLU/"+b+"/")
+    latex_accuracy("MNIST-BN/", "out/quantized/MNIST-Bottleneck/8/")
+    latex_accuracy("MNIST-10/", "out/quantized/MNIST-10/8/")
 
 elif EXP=="quantize-extra":
     # Plots for 4,32-bit quantized synthetic experiments: Tanh and ReLU, I-plane, accuracy

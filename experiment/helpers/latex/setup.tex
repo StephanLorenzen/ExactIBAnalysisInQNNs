@@ -50,7 +50,7 @@ IB plot REAL/.style={
     scatter,only marks,mark=none,
     scatter/position=absolute,  
     scatter/@pre marker code/.code={
-        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}] (pt-\pgfkeysvalueof{/data point/index}) at 
+        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0] (pt-\pgfkeysvalueof{/data point/index}) at 
     (\pgfkeysvalueof{/data point/x},\pgfkeysvalueof{/data point/y}){};},
     scatter/@post marker code/.code={%
     \ifnum\pgfkeysvalueof{/data point/index}=0
@@ -59,7 +59,7 @@ IB plot REAL/.style={
       \ifnum\itest=0
       \else
         \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
-        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}, opacity=0.15] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
+        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0, opacity=0.65] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
       \fi
     \fi
 }},

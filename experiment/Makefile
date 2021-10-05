@@ -20,7 +20,7 @@ quantize-extra:
 	python helpers/quantize.py SYN-ReLU 4
 	python helpers/quantize.py SYN-Tanh 32
 	python helpers/quantize.py SYN-ReLU 32
-	python helpers/quantize.py MNIST-10 8 20
+	python helpers/quantize.py MNIST-10 8 10
 
 # Create latex plots
 plot-quantize:
@@ -55,11 +55,14 @@ plot-accuracy:
 	python helpers/plot.py accuracy
 	cd helpers/latex; lualatex SYN_Tanh_accuracy
 	cd helpers/latex; lualatex SYN_ReLU_accuracy
-	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -rf accuracy
+	cd helpers/latex; lualatex REAL_accuracy
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_accuracy.{log,aux} rm -rf accuracy
 	mv helpers/latex/SYN_*.pdf plots/
+	mv helpers/latex/REAL_accuracy.pdf plots/
 
 # Clean
 clean:
 	rm -f IB
-	#rm -rf out
+	rm -rf out
 	rm -rf plots
+	rm -rf data

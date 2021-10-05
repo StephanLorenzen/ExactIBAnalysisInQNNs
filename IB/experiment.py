@@ -7,8 +7,6 @@ from time import time
 
 from multiprocessing import Pool
 
-from carbontracker.tracker import CarbonTracker as CT
-
 from . import data as IBdata, models as IBmodels
 from .models import callbacks
 from .util import estimator
@@ -24,7 +22,6 @@ def run_experiment(
         out_path=None,
         start_from=1,
         low_memory=False,
-        use_carbontracker=False,
         ):
    
     seed = 1000
@@ -38,15 +35,12 @@ def run_experiment(
     acc_path = out_path+"accuracy/"
     act_path = out_path+"activations/"
     _2D_path  = act_path+"2D/"
-    model_path = out_path+"models/"
-    for path in [MI_path, acc_path, act_path, _2D_path, model_path]:
+    for path in [MI_path, acc_path, act_path, _2D_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
     
     # Run experiment loop
     print("Starting experiment loop...")
-    if use_carbontracker:
-        tracker = CT(epochs=1)
 
     lmest = None
     if low_memory:
@@ -57,13 +51,11 @@ def run_experiment(
             lmest.append(lambda A: Est(A,y))
     for rep in range(start_from-1, repeats):
         print(">>> Iteration: "+_zp(rep+1))
-        if use_carbontracker:
-            tracker.epoch_start()
 
         # Train and get activations
         print(">> Fitting model, "+str(epochs)+" epochs")
         ts = time()
-        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep, model_save_path=model_path if rep==0 else None) 
+        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep) 
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
         for i,Est in enumerate(MI_estimators):
@@ -102,10 +94,6 @@ def run_experiment(
             np.array(info["max"]),
             columns=col_layers
         ).to_csv(act_path+_zp(rep+1)+"_max.csv", index_label="epoch")
-        if use_carbontracker:
-            tracker.epoch_stop()
-    if use_carbontracker:
-        tracker.stop()
 
 def _zp(val):
     val = str(val)
@@ -129,7 +117,7 @@ def prep_data(data, seed):
     return (X_train, y_train), (X_test, y_test), (X,y)
 
 # Model training
-def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimators=None, seed=None, model_save_path=None):
+def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimators=None, seed=None):
     model, quantized = Model()
     
     X_train,y_train = train_data
@@ -150,7 +138,7 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimat
     info = dict()
    
     # Callback
-    callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized, model_save_path=model_save_path)
+    callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized)
     hist = model.fit(
             X_train,
             y_train,

@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     from .models import load as load_model
     from .models import get_activation_bound
-    from .util.estimator import BinningEstimator, QuantizedEstimator, KNNEstimator
+    from .util.estimator import BinningEstimator, QuantizedEstimator
 
     from .util import plot as IBplot
 
@@ -27,8 +27,6 @@ if __name__ == '__main__':
 
         if quantize:
             MI_estimators = [QuantizedEstimator(bounds="layer", bits=bits, use_mean=args.um)]
-        elif args.mi=="knn":
-            MI_estimators = [KNNEstimator(k=10)]
         elif args.mi=="binning":
             MI_estimators = []
             for n_bins in [30, 100, 256]:
@@ -71,7 +69,6 @@ if __name__ == '__main__':
                 repeats      = args.r,
                 out_path     = out_path,
                 start_from   = first_rep,
-                use_carbontracker = False 
                 )
 
     def plot(args):
@@ -113,7 +110,7 @@ if __name__ == '__main__':
     
     # Estimator setup
     parser_exp.add_argument("-mi", metavar="ESTIMATOR", type=str,
-                            default="binning", choices={"binning", "knn"},
+                            default="binning", choices={"binning"},
                             help="MI estimator.")
     parser_exp.add_argument("-um", action='store_const', const=True, default=False,
                             help="Use mean of MI of neurons instead of MI of entire layer.")
@@ -142,5 +139,5 @@ if __name__ == '__main__':
     parser_plot.set_defaults(func=plot)
 
     args = parser.parse_args()
-
+    
     args.func(args)

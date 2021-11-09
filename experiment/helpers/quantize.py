@@ -15,29 +15,27 @@ if __name__ == '__main__':
     prefit   = int(sys.argv[3]) if len(sys.argv)>=4 else 0
     repeats  = int(sys.argv[4]) if len(sys.argv)>=5 else 50
 
-    if exp not in ("MNIST-Tanh","MNIST-ReLU","MNIST-Bottleneck","SYN-Tanh","SYN-ReLU"):
-        print("Experiment must be one of 'MNIST[-{Tanh,ReLU,Bottleneck}]' or 'SYN-{Tanh,ReLU}'")
-        sys.exit(1)
-
     # Model
+    _model = None
     if exp[:3]=="SYN":
         _model  = load_model("SYN")
         act_fun = exp[4:].lower()
         dname   = "SYN"
-        Model   = lambda: (_model(activation=act_fun, quantize=(bits<=16), num_bits=bits), (bits<=16))
         epochs  = 8000
     elif exp=="MNIST-Tanh" or exp=="MNIST-ReLU":
         act_fun = exp[6:].lower()
         _model  = load_model("MNIST-10")
         dname   = "MNIST"
-        Model   = lambda: (_model(activation=act_fun,quantize=(bits<=16), num_bits=bits), (bits<=16))
         epochs  = 3000
-    elif exp=="MNIST-Bottleneck":
+    elif exp[:5]=="MNIST":
         act_fun = "relu"
-        _model  = load_model("MNIST-Bottleneck")
+        _model  = load_model(exp)
         dname   = "MNIST"
-        Model   = lambda: (_model(activation=act_fun,quantize=(bits<=16), num_bits=bits), (bits<=16))
         epochs  = 3000
+    if _model is None:
+        print("Unknown experiment or model!")
+        sys.exit(1)
+    Model   = lambda: (_model(activation=act_fun, quantize=(bits<=16), num_bits=bits), (bits<=16))
 
     # MI estimators
     estimators = [QuantizedEstimator(bounds="layer", bits=bits)]

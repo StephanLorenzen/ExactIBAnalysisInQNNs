@@ -18,6 +18,7 @@ def run_experiment(
         lr=10**-4,
         batch_size=256,
         epochs=8000,
+        prefit_random=0,
         repeats=1,
         out_path=None,
         start_from=1,
@@ -55,7 +56,8 @@ def run_experiment(
         # Train and get activations
         print(">> Fitting model, "+str(epochs)+" epochs")
         ts = time()
-        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,estimators=lmest, seed=seed+rep) 
+        if prefit_random>0: print(">>> Prefitting to random labels: "+str(prefit_random)+" epochs")
+        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,prefit_random=prefit_random,estimators=lmest, seed=seed+rep) 
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
         for i,Est in enumerate(MI_estimators):
@@ -117,7 +119,7 @@ def prep_data(data, seed):
     return (X_train, y_train), (X_test, y_test), (X,y)
 
 # Model training
-def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimators=None, seed=None):
+def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, prefit_random=False, estimators=None, seed=None):
     model, quantized = Model()
     
     X_train,y_train = train_data
@@ -137,6 +139,13 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, estimat
     # Output
     info = dict()
    
+    # Prefit random:
+    if prefit_random>0:
+        # prefit_random is number of epochs to prefit
+        # Shuffle labels
+        random_y_train = tf.random.shuffle(y_train)
+        model.fit(X_train,y_train,batch_size=batch_size,epochs=prefit_random,verbose=0)
+
     # Callback
     callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized)
     hist = model.fit(

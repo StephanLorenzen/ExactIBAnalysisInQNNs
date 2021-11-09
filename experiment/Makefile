@@ -11,7 +11,7 @@ data:
 quantize:
 	python helpers/quantize.py SYN-Tanh 8
 	python helpers/quantize.py SYN-ReLU 8
-	python helpers/quantize.py MNIST-Bottleneck 8 20
+	python helpers/quantize.py MNIST-Bottleneck 8 0 20
 binning:
 	python helpers/binning.py SYN-Tanh
 	python helpers/binning.py SYN-ReLU
@@ -20,7 +20,10 @@ quantize-extra:
 	python helpers/quantize.py SYN-ReLU 4
 	python helpers/quantize.py SYN-Tanh 32
 	python helpers/quantize.py SYN-ReLU 32
-	python helpers/quantize.py MNIST-10 8 10
+	python helpers/quantize.py MNIST-10 8 0 10
+quantize-prefit:
+	python helpers/quantize.py SYN-Tanh 8 1000 20
+	python helpers/quantize.py SYN-ReLU 8 1000 20
 
 # Create latex plots
 plot-quantize:

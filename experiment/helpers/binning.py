@@ -6,12 +6,13 @@ from IB.experiment import run_experiment
 
 if __name__ == '__main__':
     if len(sys.argv)<2:
-        print("Missing arguments, binning.py <experiment> [repeats=50].")
+        print("Missing arguments, binning.py <experiment> [prefit=0] [repeats=50].")
         sys.exit(1)
 
     # Activation function
     exp      = sys.argv[1]
-    repeats  = int(sys.argv[2]) if len(sys.argv)>=3 else 50
+    prefit   = int(sys.argv[2]) if len(sys.argv)>=3 else 0
+    repeats  = int(sys.argv[3]) if len(sys.argv)>=4 else 50
 
     if exp not in ("MNIST-Tanh","MNIST-ReLU","MNIST-Bottleneck","SYN-Tanh","SYN-ReLU"):
         print("Experiment must be one of 'MNIST[-{Tanh,ReLU,Bottleneck}]' or 'SYN-{Tanh,ReLU}'")
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     for n_bins in [30,100,256]:
         estimators.append(BinningEstimator("uniform", n_bins=n_bins, bounds="global"))
 
-    res_path = "out/binning/"+exp+"/"
+    res_path = "out/binning/"+exp+("_prefit_"+str(prefit) if prefit>0 else "")+"/"
 
     print("Starting binning experiment.")
-    run_experiment(Model, estimators, dname, epochs=epochs, repeats=repeats, out_path=res_path)
+    run_experiment(Model, estimators, dname, epochs=epochs, random_prefit=prefit, repeats=repeats, out_path=res_path)

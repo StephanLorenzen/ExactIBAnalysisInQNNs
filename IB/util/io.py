@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 
-def load_MI(path, est="binning_uniform_30"):
+def load_MI_repeats(path, est="binning_uniform_30"):
     if not os.path.isdir(path):
         raise Exception("Directory does not exists '"+path+"'")
     repeats = []
@@ -25,7 +25,10 @@ def load_MI(path, est="binning_uniform_30"):
         assert(len(epoch)==l)
         repeats.append(epoch)
     
-    repeats = np.array(repeats)
+    return np.array(repeats)
+
+def load_MI(path, est=None):
+    repeats = load_MI_repeats(path,est)
     nmean   = np.mean(repeats,axis=0)
     nstd    = np.std(repeats,axis=0)
     

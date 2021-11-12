@@ -160,7 +160,7 @@ def MNIST_CONV(init='truncated_normal', quantize=False, fixed_quant=False, num_b
         ("MaxPool2D", (2,2)),
         ("Conv2D", 2, 'relu', (3,3)),
         ("Flatten",),
-        ("Dense", 64, 'relu'),
+        ("Dense", 20, 'relu'),
         ("Dense", 10, 'softmax')
     ]
     return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)

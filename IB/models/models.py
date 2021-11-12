@@ -144,6 +144,8 @@ def MNIST_HG(activation='relu', init='truncated_normal', quantize=False, fixed_q
         ("Dense", 8, activation),
         ("Dense", 4, activation),
         ("Dense", 2, activation),
+        ("Dense", 4, activation),
+        ("Dense", 8, activation),
         ("Dense", 10, 'softmax')
     ]
     return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)

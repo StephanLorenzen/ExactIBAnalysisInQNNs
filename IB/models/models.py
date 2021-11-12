@@ -151,7 +151,7 @@ def MNIST_HG(activation='relu', init='truncated_normal', quantize=False, fixed_q
     return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
 
 # Small convolutional MNIST architecture
-def MNIST_CONV(init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+def MNIST_CONV(activation=None, init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     k_layers = [
         ('Input', (28,28,1)),
         ("Conv2D", 2, 'relu', (3,3)),

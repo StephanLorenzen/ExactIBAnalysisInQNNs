@@ -66,13 +66,17 @@ def run_experiment(
                 os.makedirs(path)
             if low_memory:
                 print(">>> Storing MI, "+str(Est))
+                MIs_prefit = np.array(info["prefit"]["MI"][i]) if "prefit" in info else None
                 MIs = np.array(info["MI"][i])
             else:
                 print(">>> Estimating, "+str(Est))
                 ts = time()
+                MIs_prefit = compute_MI(info["prefit"]["activations"]) if "prefit" in info else None
                 MIs = compute_MI(Est, info["activations"], y)
                 print(">>> Mutual information computed, elapsed: "+str(int(time()-ts))+"s")
             np.savetxt(path+_zp(rep+1)+".txt", MIs.reshape(MIs.shape[0],-1))
+            if MIs_prefit is not None:
+                np.savetxt(path+_zp(rep+1)+"_prefit.txt", MIs_prefit.reshape(MIs_prefit.shape[0],-1))
 
         # Store train and test accuracy and activation min/max
         print(">> Storing training and test accuracies.")
@@ -138,16 +142,29 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, prefit_
         
     # Output
     info = dict()
-   
+    
     # Prefit random:
     if prefit_random>0:
         # prefit_random is number of epochs to prefit
+        rand_info = dict()
+        cb = callbacks.TrainingTracker(X,rand_info,estimators=estimators,quantized=quantized)
         # Shuffle labels
         random_y_train = tf.random.shuffle(y_train)
-        model.fit(X_train,y_train,batch_size=batch_size,epochs=prefit_random,verbose=0)
+        model.fit(
+            X_train,
+            random_y_train,
+            batch_size=batch_size,
+            epochs=prefit_random,
+            callbacks=[cb],
+            verbose=0
+        )
+        rand_info["min"] = np.array(rand_info["min"])
+        rand_info["max"] = np.array(rand_info["max"])
+        info["prefit"] = rand_info
 
     # Callback
     callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized)
+    # Fit
     hist = model.fit(
             X_train,
             y_train,

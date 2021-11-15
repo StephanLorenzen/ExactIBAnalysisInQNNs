@@ -97,7 +97,7 @@ def ShwartzZiv99(activation='tanh', init='truncated_normal', quantize=False, fix
     return FNN([12,10,7,5,4,3,2], activation=activation, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)
 
 # Flat architecture (layers of 10)
-def MNIST_10(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
+def MNIST_4X10(activation='tanh', init='truncated_normal', quantize=False, fixed_quant=False, num_bits=8):
     k_layers = [
         ("Input", (28,28,1)),
         ("Flatten",),
@@ -158,9 +158,8 @@ def MNIST_CONV(activation=None, init='truncated_normal', quantize=False, fixed_q
         ("MaxPool2D", (2,2)),
         ("Conv2D", 2, 'relu', (3,3)),
         ("MaxPool2D", (2,2)),
-        ("Conv2D", 2, 'relu', (3,3)),
         ("Flatten",),
-        ("Dense", 20, 'relu'),
+        ("Dense", 16, 'relu'),
         ("Dense", 10, 'softmax')
     ]
     return NN(k_layers, init=init, quantize=quantize, fixed_quant=fixed_quant, num_bits=num_bits)

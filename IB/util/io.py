@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 
-def load_MI_repeats(path, est="binning_uniform_30"):
+def load_MI_repeats(path, est="binning_uniform_30", load_prefit=False):
     if not os.path.isdir(path):
         raise Exception("Directory does not exists '"+path+"'")
     repeats = []
@@ -16,22 +16,24 @@ def load_MI_repeats(path, est="binning_uniform_30"):
     for f in os.listdir(mi_path):
         files.append(f)
 
+    suffix = "_prefit.txt" if load_prefit else ".txt" 
     files.sort()
     for f in files:
         cnt = int(f[:3])-1
-        assert(cnt==len(repeats))
+        if not f[3:]==suffix: continue
         epoch = np.genfromtxt(mi_path+f)
+        assert(cnt==len(repeats))
         l = len(epoch) if l is None else l
         assert(len(epoch)==l)
         repeats.append(epoch)
     
     return np.array(repeats)
 
-def load_MI(path, est=None):
-    repeats = load_MI_repeats(path,est)
+def load_MI(path, est=None, load_prefit=False):
+    repeats = load_MI_repeats(path,est,load_prefit=load_prefit)
     nmean   = np.mean(repeats,axis=0)
     nstd    = np.std(repeats,axis=0)
-    
+
     num_epochs, num_layers = nmean.shape
     num_layers //= 2
 
@@ -41,7 +43,6 @@ def load_MI(path, est=None):
         std.append([(ss[2*i],ss[2*i+1]) for i in range(num_layers)])
 
     return mean, std
-
 
 def load_accuracy(path):
     if not os.path.isdir(path):

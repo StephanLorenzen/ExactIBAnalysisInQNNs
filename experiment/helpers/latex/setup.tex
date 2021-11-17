@@ -9,6 +9,20 @@
 \definecolor{colTrain}{rgb}{0,0.5,0}
 \definecolor{colTest}{rgb}{0.5, 0, 0}
 
+%\definecolor{col1}{rgb}{0.5,0,0}
+%\definecolor{col2}{rgb}{0,0.5,0}
+%\definecolor{col3}{rgb}{0,0,0.5}
+%\definecolor{col4}{rgb}{0.5,0.5,0}
+%\definecolor{col5}{rgb}{0,0.5,0.5}
+%\definecolor{col6}{rgb}{0.5,0,0.5}
+
+\colorlet{col1}{blue}
+\colorlet{col2}{black!33!blue}
+\colorlet{col3}{black!66!blue}
+\colorlet{col4}{black}
+\colorlet{col5}{red!50!black}
+\colorlet{col6}{red}
+
 \pgfplotsset{
 compat=1.16,
 /pgfplots/colormap={info_plane}{
@@ -31,6 +45,9 @@ IB plot/.style={
       \fi
     \fi
 }},
+IB prefit/.style={
+    only marks,fill=gray,color=gray
+},
 IB axis/.style={
 	height=0.7\linewidth,
 	width=0.7\linewidth,
@@ -46,7 +63,7 @@ IB axis/.style={
 	ylabel={$I(T_i,Y)$},
 	xlabel={$I(X,T_i)$},
 },
-IB plot REAL/.style={
+IB plot REAL5/.style={
     scatter,only marks,mark=none,
     scatter/position=absolute,  
     scatter/@pre marker code/.code={
@@ -56,6 +73,40 @@ IB plot REAL/.style={
     \ifnum\pgfkeysvalueof{/data point/index}=0
     \else
       \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},5)} % 5 layers
+      \ifnum\itest=0
+      \else
+        \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
+        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0, opacity=0.65] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
+      \fi
+    \fi
+}},
+IB plot REAL6/.style={
+    scatter,only marks,mark=none,
+    scatter/position=absolute,  
+    scatter/@pre marker code/.code={
+        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0] (pt-\pgfkeysvalueof{/data point/index}) at 
+    (\pgfkeysvalueof{/data point/x},\pgfkeysvalueof{/data point/y}){};},
+    scatter/@post marker code/.code={%
+    \ifnum\pgfkeysvalueof{/data point/index}=0
+    \else
+      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},5)} % 5 layers
+      \ifnum\itest=0
+      \else
+        \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}
+        \draw[line width=1pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0, opacity=0.65] (pt-\lastindex) -- (pt-\pgfkeysvalueof{/data point/index});
+      \fi
+    \fi
+}},
+IB plot REAL7/.style={
+    scatter,only marks,mark=none,
+    scatter/position=absolute,  
+    scatter/@pre marker code/.code={
+        \node[circle,fill,inner sep=1.5pt,color of colormap=\pgfkeysvalueof{/data point/index}/2.0] (pt-\pgfkeysvalueof{/data point/index}) at 
+    (\pgfkeysvalueof{/data point/x},\pgfkeysvalueof{/data point/y}){};},
+    scatter/@post marker code/.code={%
+    \ifnum\pgfkeysvalueof{/data point/index}=0
+    \else
+      \pgfmathtruncatemacro{\itest}{mod(\pgfkeysvalueof{/data point/index},7)} % 7 layers
       \ifnum\itest=0
       \else
         \pgfmathtruncatemacro{\lastindex}{\pgfkeysvalueof{/data point/index}-1}

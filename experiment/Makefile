@@ -15,18 +15,18 @@ quantize:
 binning:
 	python helpers/binning.py SYN-Tanh
 	python helpers/binning.py SYN-ReLU
-quantize-extra:
+bit-width:
 	python helpers/quantize.py SYN-Tanh 4
 	python helpers/quantize.py SYN-ReLU 4
 	python helpers/quantize.py SYN-Tanh 32
 	python helpers/quantize.py SYN-ReLU 32
-	python helpers/quantize.py MNIST-10 8 0 10
 quantize-prefit:
 	python helpers/quantize.py SYN-Tanh 8 1000 20
 	python helpers/quantize.py SYN-ReLU 8 1000 20
 quantize-archs:
 	python helpers/quantize.py MNIST-Bottleneck-4 8 0 20
 	python helpers/quantize.py MNIST-HourGlass 8 0 20
+	python helpers/quantize.py MNIST-10 8 0 10
 	python helpers/quantize.py MNIST-Conv 8 0 10
 
 # Create latex plots
@@ -48,15 +48,25 @@ plot-binning:
 	cd helpers/latex; lualatex SYN_bin_Tanh_IP
 	cd helpers/latex; rm -f SYN_bin_*.{log,aux}; rm -rf binning
 	mv helpers/latex/SYN_bin_*.pdf plots/
-plot-quantize-extra:
+plot-bit-width:
 	mkdir -p plots
-	python helpers/plot.py quantize-extra
+	python helpers/plot.py bit-width
 	cd helpers/latex; lualatex SYN_4b_IP
 	cd helpers/latex; lualatex SYN_32b_IP
-	cd helpers/latex; lualatex REAL_8b_10_IP
-	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_8b_10_IP.{log,aux}; rm -rf quantize-extra
+	cd helpers/latex; rm -f SYN_*.{log,aux}; rm -f REAL_8b_10_IP.{log,aux}; rm -rf bit-width
 	mv helpers/latex/SYN_{4,32}b_*.pdf plots/
-	mv helpers/latex/REAL_8b_10_IP.pdf plots/
+plot-prefit:
+	mkdir -p plots
+	python helpers/plot.py prefit
+	cd helpers/latex; lualatex SYN_8b_prefit_IP
+	cd helpers/latex; rm -f SYN_8b_prefit_IP.{log,aux}; rm -rf prefit
+	mv helpers/latex/SYN_8b_prefit_IP.pdf plots/
+plot-archs:
+	mkdir -p plots
+	python helpers/plot.py archs
+	cd helpers/latex; lualatex REAL_8b_archs_IP 
+	cd helpers/latex; rm -f REAL_8b_archs_IP.{log,aux}; rm -rf archs
+	mv helpers/latex/REAL_8b_archs_IP.pdf plots/
 plot-accuracy:
 	mkdir -p plots
 	python helpers/plot.py accuracy

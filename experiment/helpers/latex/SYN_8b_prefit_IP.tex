@@ -1,0 +1,25 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+
+\begin{document}
+\pgfplotstableread[col sep=comma]{prefit/SYN-Tanh/quantized_layer_8_bits.csv}\tabTanh
+\pgfplotstableread[col sep=comma]{prefit/SYN-Tanh/quantized_layer_8_bits_prefit.csv}\tabTanhPrefit
+\pgfplotstableread[col sep=comma]{prefit/SYN-ReLU/quantized_layer_8_bits.csv}\tabReLU
+\pgfplotstableread[col sep=comma]{prefit/SYN-ReLU/quantized_layer_8_bits_prefit.csv}\tabReLUPrefit
+
+\begin{tikzpicture}
+	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=2cm,vertical sep=0cm}]
+    \nextgroupplot[IB axis, title={\tanh{}}]
+			\addplot[IB prefit] table[x=x,y=y]{\tabTanhPrefit};
+			\addplot[IB plot] table[x=x,y=y]{\tabTanh};
+    \nextgroupplot[IB axis, IB colorbar single, title={\relu{}}]
+			\addplot[IB prefit] table[x=x,y=y]{\tabReLUPrefit};
+      \addplot[IB plot] table[x=x,y=y]{\tabReLU};
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

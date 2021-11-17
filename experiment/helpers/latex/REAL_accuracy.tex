@@ -2,13 +2,12 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepgfplotslibrary{groupplots}
+\usepackage{ifthen}
 
 \input{setup.tex}
 \usepgfplotslibrary{fillbetween}
 
 \begin{document}
-\pgfplotstableread[col sep=comma]{accuracy/MNIST-BN/accuracy.csv}\accA
-\pgfplotstableread[col sep=comma]{accuracy/MNIST-10/accuracy.csv}\accB
 \pgfplotsset{
 acc axis/.style={
 	xmin=0,xmax=3000,
@@ -20,33 +19,43 @@ acc axis/.style={
 },
 }
 
+\newcommand{\addaccplot}[1]{
+  % Train
+  \pgfplotstableread[col sep=comma]{accuracy/MNIST-#1/accuracy.csv}\accTab
+  \addplot[color=colTrain] table[x=epoch,y=train_mean]{\accTab};
+	\addplot[name path=up, draw=none] table[x=epoch,y=train_up]{\accTab};
+	\addplot[name path=lw, draw=none] table[x=epoch,y=train_lw]{\accTab};
+	\addplot[colTrain!40,fill opacity=0.4] fill between[of=up and lw];
+  % Test
+	\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accTab};
+	\addplot[name path=up2, color=colTest!40] table[x=epoch,y=test_up]{\accTab};
+	\addplot[name path=lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accTab};
+	\addplot[colTest!40,fill opacity=0.4] fill between[of=up2 and lw2];
+}
+
 \begin{tikzpicture}
-	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=0cm,vertical sep=0cm}]
-    \nextgroupplot[acc axis,title=Bottleneck network,xtick={0,1000,2000}]
-		% Train
-		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accA};
-		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accA};
-		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accA};
-		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
-		
-		% Test
-		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accA};
-		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accA};
-		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accA};
-		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
-	  
-    \nextgroupplot[acc axis,title=Complex network,IB noY,xtick={0,1000,2000,3000}]
-		% Train
-		\addplot[color=colTrain] table[x=epoch,y=train_mean]{\accB};
-		\addplot[name path=tanh_up, color=colTrain!40] table[x=epoch,y=train_up]{\accB};
-		\addplot[name path=tanh_lw, color=colTrain!40] table[x=epoch,y=train_lw]{\accB};
-		\addplot[colTrain!40,fill opacity=0.4] fill between[of=tanh_up and tanh_lw];
-		
-		% Test
-		\addplot[color=colTest,dashed] table[x=epoch,y=test_mean]{\accB};
-		\addplot[name path=tanh_up2, color=colTest!40] table[x=epoch,y=test_up]{\accB};
-		\addplot[name path=tanh_lw2, color=colTest!40] table[x=epoch,y=test_lw]{\accB};
-		\addplot[colTest!40,fill opacity=0.4] fill between[of=tanh_up2 and tanh_lw2];
+	\begin{groupplot}[group style={group size= 5 by 1, horizontal sep=0cm,vertical sep=0cm}]
+    \nextgroupplot[acc axis,title=\textsc{Bottleneck-2},xtick={0,1000,2000}];
+    \addaccplot{Bottleneck-2}
+    \nextgroupplot[acc axis,IB noY,title=\textsc{Bottleneck-4},xtick={0,1000,2000}];
+    \addaccplot{Bottleneck-4}
+    \nextgroupplot[acc axis,IB noY,title=\textsc{HourGlass},xtick={0,1000,2000}];
+    \addaccplot{HourGlass}
+    \nextgroupplot[acc axis,IB noY,title=\textsc{4x10},xtick={0,1000,2000}];
+    \addaccplot{4x10}
+    \nextgroupplot[
+      acc axis,
+      title=\textsc{Conv},
+      IB noY,
+      legend style={at={(0.85,0.1)}},
+      xtick={0,1000,2000,3000}
+    ];
+		% Legend
+		\addlegendimage{no markers,colTrain}
+		\addlegendentry{Train}
+		\addlegendimage{no markers,dashed,colTest}
+		\addlegendentry{Test}
+    \addaccplot{Conv}
 	\end{groupplot}
 \end{tikzpicture}
 

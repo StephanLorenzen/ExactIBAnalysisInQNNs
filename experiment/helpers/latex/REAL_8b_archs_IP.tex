@@ -1,0 +1,28 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+
+\begin{document}
+\usepgfplotslibrary{fillbetween}
+\pgfplotstableread[col sep=comma]{archs/MNIST-Bottleneck-4/quantized_layer_8_bits.csv}\ipBN
+\pgfplotstableread[col sep=comma]{archs/MNIST-HourGlass/quantized_layer_8_bits.csv}\ipHG
+\pgfplotstableread[col sep=comma]{archs/MNIST-4x10/quantized_layer_8_bits.csv}\ipFlat
+\pgfplotstableread[col sep=comma]{archs/MNIST-Conv/quantized_layer_8_bits.csv}\ipConv
+
+\begin{tikzpicture}
+  \begin{groupplot}[group style={group size= 2 by 2, horizontal sep=2cm,vertical sep=2cm}]
+    \nextgroupplot[IB axis MNIST, title={\textsc{Bottleneck-4}}]
+			\addplot[IB plot REAL5] table[x=x,y=y]{\ipBN};
+    \nextgroupplot[IB axis MNIST, title={\textsc{HourGlass}}]
+			\addplot[IB plot REAL7] table[x=x,y=y]{\ipHG};
+    \nextgroupplot[IB axis MNIST, title={\textsc{4x10}}]
+			\addplot[IB plot REAL5] table[x=x,y=y]{\ipFlat};
+    \nextgroupplot[IB axis MNIST, title={\textsc{Conv}}]
+			\addplot[IB plot REAL6, IB colorbar single] table[x=x,y=y]{\ipConv};
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

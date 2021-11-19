@@ -35,12 +35,15 @@ plot-quantize:
 	python helpers/plot.py quantize
 	# I-planes
 	cd helpers/latex; lualatex SYN_8b_ReLU_IP
+	cd helpers/latex; lualatex SYN_8b_ReLU_MI
 	cd helpers/latex; lualatex SYN_8b_Tanh_IP
+	cd helpers/latex; lualatex SYN_8b_Tanh_MI
 	cd helpers/latex; lualatex REAL_8b_BN_IP
+	cd helpers/latex; lualatex REAL_8b_BN_MI
 	# Clean and move
-	cd helpers/latex; rm -f SYN_8b_*.{log,aux}; rm -f REAL_8b_BN_IP.{log,aux}; rm -rf quantize
+	cd helpers/latex; rm -f SYN_8b_*.{log,aux}; rm -f REAL_8b_BN_*.{log,aux}; rm -rf quantize
 	mv helpers/latex/SYN_8b_*.pdf plots/
-	mv helpers/latex/REAL_8b_BN_IP.pdf plots/
+	mv helpers/latex/REAL_8b_BN_*.pdf plots/
 plot-binning:
 	mkdir -p plots
 	python helpers/plot.py binning

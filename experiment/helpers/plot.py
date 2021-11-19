@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas as pd
+import numpy as np
 
 import IB.util.io as iio
 
@@ -35,13 +36,50 @@ def latex_MI(est,out_suf,data_path,prefit=False):
     
     pd.DataFrame(df).to_csv(out_file,index_label="epoch")
 
-def latex_MI_var(est,out_suf,data_path,var="X"):
+# Return best, center, second worst and worst
+def latex_MI_ranks(est,out_suf,data_path):
     out_dir = OUT_DIR+out_suf
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
-    out_file = out_dir+est+"_"+var+".csv"
+    try: mean, _ = iio.load_MI(data_path,est,load_prefit=False)
+    except:
+        print("File not found",(data_path,est))
+        return
+    repeats = iio.load_MI_repeats(data_path,est,load_prefit=False)
+    n_rep, n_epoch, n_layer = repeats.shape
+    mean = np.array(mean).reshape(-1,n_layer)
+    
+    repeats = [(rep,((rep-mean)**2).sum()) for rep in repeats]
+    repeats.sort(key=lambda x: x[1])
+    repeats = [rep.reshape(-1,n_layer//2,2) for rep,_ in repeats]
+    relevant = [
+        ("best",repeats[0]),
+        ("middle",repeats[n_rep//2]),
+        ("2nd_worst", repeats[-2]),
+        ("worst", repeats[-1])
+    ]
+    for name, rep in relevant:
+        df  = {"x":[],"y":[],"c":[]}
+        # 8000 / 5 = 1600
+        # 3000 / 2 = 1500
+        mod = 5 if len(mean)>6000 else 2
+        for epoch,mi in enumerate(rep):
+            if epoch % mod != 0:
+                continue
+            df["c"] += [epoch/n_epoch]*len(mi)
+            df["x"] += [x for x,_ in mi]
+            df["y"] += [y for _,y in mi]
+        out_file = out_dir+est+"_"+name+".csv"
+        print("Creating worst MI plane file: '"+out_file+"'")
+        pd.DataFrame(df).to_csv(out_file,index_label="epoch")
+
+def latex_MI_var(est,out_suf,data_path,var="X",prefit=False):
+    out_dir = OUT_DIR+out_suf
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+    out_file = out_dir+est+"_"+var+("_prefit" if prefit else "")+".csv"
     print("Creating MI plane file for "+var+": '"+out_file+"'")
-    try: mean, std = iio.load_MI(data_path,est)
+    try: mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
     except:
         print("File not found",(data_path,est))
         return
@@ -92,12 +130,16 @@ def latex_accuracy(out_suf,data_path):
 
 if EXP=="quantize":
     latex_MI("quantized_layer_8_bits", "SYN-Tanh/8/", "out/quantized/SYN-Tanh/8/")
+    latex_MI_ranks("quantized_layer_8_bits", "SYN-Tanh/8/", "out/quantized/SYN-Tanh/8/")
     latex_MI("quantized_layer_8_bits", "SYN-ReLU/8/", "out/quantized/SYN-ReLU/8/")
+    latex_MI_ranks("quantized_layer_8_bits", "SYN-ReLU/8/", "out/quantized/SYN-ReLU/8/")
     latex_MI("quantized_layer_8_bits", "MNIST-Bottleneck-2/", "out/quantized/MNIST-Bottleneck-2/8/")
+    latex_MI_ranks("quantized_layer_8_bits", "MNIST-Bottleneck-2/", "out/quantized/MNIST-Bottleneck-2/8/")
     
     for var in ("X","Y"):
         latex_MI_var("quantized_layer_8_bits", "SYN-Tanh/8/","out/quantized/SYN-Tanh/8/",var)
         latex_MI_var("quantized_layer_8_bits", "SYN-ReLU/8/","out/quantized/SYN-ReLU/8/",var)
+        latex_MI_var("quantized_layer_8_bits", "MNIST-Bottleneck-2/","out/quantized/MNIST-Bottleneck-2/8/",var)
 
 elif EXP=="accuracy":
     latex_accuracy("SYN-Tanh/bin/", "out/binning/SYN-Tanh/")
@@ -128,7 +170,7 @@ elif EXP=="prefit":
     latex_MI("quantized_layer_8_bits", "SYN-Tanh/", "out/quantized/SYN-Tanh_prefit_1000/8/", prefit=True)
     latex_MI("quantized_layer_8_bits", "SYN-ReLU/", "out/quantized/SYN-ReLU_prefit_1000/8/")
     latex_MI("quantized_layer_8_bits", "SYN-ReLU/", "out/quantized/SYN-ReLU_prefit_1000/8/", prefit=True)
-
+    
 elif EXP=="archs":
     latex_MI("quantized_layer_8_bits", "MNIST-Bottleneck-4/", "out/quantized/MNIST-Bottleneck-4/8/")
     latex_MI("quantized_layer_8_bits", "MNIST-HourGlass/",    "out/quantized/MNIST-HourGlass/8/")

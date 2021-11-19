@@ -1,0 +1,48 @@
+\documentclass[crop,tikz]{standalone}% 'crop' is the default for v1.0, before it was 'preview'
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+
+\input{setup.tex}
+\usepgfplotslibrary{fillbetween}
+\begin{document}
+\pgfplotstableread[col sep=comma]{quantize/SYN-ReLU/8/quantized_layer_8_bits_X.csv}\tabX
+\pgfplotstableread[col sep=comma]{quantize/SYN-ReLU/8/quantized_layer_8_bits_Y.csv}\tabY
+\pgfplotstableread[col sep=comma]{quantize/SYN-ReLU/8/quantized_layer_8_bits_middle.csv}\iplane
+
+\begin{tikzpicture}
+	\begin{groupplot}[
+      group style={
+        group size= 3 by 1,
+        horizontal sep=1.6cm,
+        vertical sep=0cm},
+    ]
+    \nextgroupplot[MI axis,ylabel={$I(X,T)$}]
+    \pgfplotsinvokeforeach{1,...,6}{
+      \addplot[color=col#1] table[x=epoch,y=mean_#1]{\tabX};
+		  \addplot[name path=up, draw=none] table[x=epoch,y=up_#1]{\tabX};
+		  \addplot[name path=lw, draw=none] table[x=epoch,y=lw_#1]{\tabX};
+      \addplot[col#1!40,fill opacity=0.4] fill between[of=up and lw];
+		}
+    \nextgroupplot[
+      MI axis,
+      ylabel={$I(T,Y)$},
+    	legend style={ at={(0.95,0.05)}, anchor=south east,},
+      legend columns=2,
+    ]
+    \pgfplotsinvokeforeach{1,...,6}{
+      \addlegendimage{no markers,col#1}
+      \addlegendentry{$T_{#1}$}
+    }
+    \pgfplotsinvokeforeach{1,...,6}{
+      \addplot[color=col#1] table[x=epoch,y=mean_#1]{\tabY};
+		  \addplot[name path=up, draw=none] table[x=epoch,y=up_#1]{\tabY};
+		  \addplot[name path=lw, draw=none] table[x=epoch,y=lw_#1]{\tabY};
+      \addplot[col#1!40,fill opacity=0.4] fill between[of=up and lw];
+		}
+		\nextgroupplot[IB axis,IB colorbar single]
+			\addplot[IB plot] table[x=x,y=y]{\iplane};
+	\end{groupplot}
+\end{tikzpicture}
+
+\end{document}

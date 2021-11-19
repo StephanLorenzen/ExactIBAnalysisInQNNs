@@ -3,6 +3,41 @@ import math
 import numpy as np
 import pandas as pd
 
+REMOVE_BAD_FITS = True
+BAD_FIT_THRESHOLD = 0.55
+
+# Removes bad fits
+def _check_repeats_bad_fit(path, repeats):
+    if not REMOVE_BAD_FITS:
+        return repeats
+    if not os.path.isdir(path):
+        raise Exception("Directory does not exists '"+path+"'")
+    def _zp(val):
+        val = str(val)
+        return "0"*(3-len(val)) + val
+    l = None
+    files = []
+    acc_path = path+"accuracy/"
+    for f in os.listdir(acc_path):
+        files.append(f)
+
+    train_accs = []
+    files.sort()
+    for f in files:
+        cnt = int(f[:3])-1
+        assert(cnt==len(train_accs))
+        repeat = pd.read_csv(acc_path+f,index_col="epoch")
+        train_accs.append(repeat["train_acc"].values)
+    
+    assert len(train_accs)==len(repeats)
+    filtered = []
+    for accs, rep in zip(train_accs,repeats):
+        if accs[-1] >= BAD_FIT_THRESHOLD:
+            filtered.append(rep)
+    if len(filtered)!=len(repeats):
+        print("### WARN: Remove",len(repeats)-len(filtered),"bad fits! ###")
+    return np.array(filtered)
+
 def load_MI_repeats(path, est="binning_uniform_30", load_prefit=False):
     if not os.path.isdir(path):
         raise Exception("Directory does not exists '"+path+"'")
@@ -27,6 +62,7 @@ def load_MI_repeats(path, est="binning_uniform_30", load_prefit=False):
         assert(len(epoch)==l)
         repeats.append(epoch)
     
+    repeats = _check_repeats_bad_fit(path, repeats)
     return np.array(repeats)
 
 def load_MI(path, est=None, load_prefit=False):
@@ -64,7 +100,10 @@ def load_accuracy(path):
         repeat = pd.read_csv(acc_path+f,index_col="epoch")
         train_accs.append(repeat["train_acc"].values)
         test_accs.append(repeat["test_acc"].values)
-    
+
+    train_accs = _check_repeats_bad_fit(path, train_accs)
+    test_accs  = _check_repeats_bad_fit(path, test_accs)
+
     train_accs, test_accs = np.array(train_accs), np.array(test_accs)
     train_mean, train_std = np.mean(train_accs,axis=0), np.std(train_accs,axis=0)
     test_mean,  test_std  = np.mean(test_accs,axis=0),  np.std(test_accs,axis=0)
@@ -95,6 +134,8 @@ def load_activations(path):
         else:
             min_acts.append(pd.read_csv(act_path+f,index_col="epoch").values)
     
+    max_acts = _check_repeats_bad_fit(path, max_acts)
+    min_acts = _check_repeats_bad_fit(path, min_acts)
 
     max_acts, min_acts = np.array(max_acts), np.array(min_acts)
     max_mean, max_std  = np.mean(max_acts,axis=0), np.std(max_acts,axis=0)

@@ -20,8 +20,8 @@ def latex_MI(est,out_suf,data_path,prefit=False):
     out_file = out_dir+est+("_prefit" if prefit else "")+".csv"
     print("Creating MI plane file: '"+out_file+"'")
     try: mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
-    except:
-        print("File not found",(data_path,est))
+    except Exception as e:
+        print("File not found",(data_path,est,e))
         return
     df  = {"x":[],"y":[],"c":[]}
     # 8000 / 5 * 6 = 9600

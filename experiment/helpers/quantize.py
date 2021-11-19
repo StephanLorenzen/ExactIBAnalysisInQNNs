@@ -16,7 +16,6 @@ if __name__ == '__main__':
     repeats  = int(sys.argv[4]) if len(sys.argv)>=5 else 50
 
     # Model
-    lr = 10**-4
     _model = None
     if exp[:3]=="SYN":
         _model  = load_model("SYN")
@@ -31,7 +30,6 @@ if __name__ == '__main__':
     elif exp[:5]=="MNIST":
         act_fun = "relu"
         _model  = load_model(exp)
-        lr      = 10**-5 if exp in ("MNIST-Bottleneck-2","MNIST-HourGlass") else lr
         dname   = "MNIST"
         epochs  = 3000
     if _model is None:
@@ -45,4 +43,4 @@ if __name__ == '__main__':
     res_path = "out/quantized/"+exp+("_prefit_"+str(prefit) if prefit>0 else "")+"/"+str(bits)+"/"
 
     print("Starting quantized experiment.")
-    run_experiment(Model, estimators, dname, epochs=epochs, lr=lr, prefit_random=prefit, repeats=repeats, low_memory=True, out_path=res_path)
+    run_experiment(Model, estimators, dname, epochs=epochs, prefit_random=prefit, repeats=repeats, low_memory=True, out_path=res_path)

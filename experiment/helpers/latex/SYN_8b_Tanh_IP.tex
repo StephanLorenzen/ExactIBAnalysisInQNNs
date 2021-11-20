@@ -12,8 +12,14 @@
 	\begin{groupplot}[group style={group size= 2 by 1, horizontal sep=2cm,vertical sep=0cm}]
 		\nextgroupplot[IB axis]
 			\addplot[IB plot] table[x=x,y=y]{\iplane};
-		\nextgroupplot[IB axis,xmin=8,xmax=12.1,ymin=0.98,ymax=1.0,xticklabels={,8,9,10,11,12},yticklabels={, ,0.98, ,0.99, ,1.0},IB colorbar single]
+		
+      % Labels
+      \node at (axis cs:3.4,0.1){$\hat Y=T_6$};
+    \nextgroupplot[IB axis,xmin=8,xmax=12.1,ymin=0.98,ymax=1.0,xticklabels={,8,9,10,11,12},yticklabels={, ,0.98, ,0.99, ,1.0},IB colorbar single]
 			\addplot[IB plot] table[x=x,y=y]{\iplane};
+      
+      % Labels
+      \node at (axis cs:10.7,0.988){$T_5$};
 	\end{groupplot}
 \end{tikzpicture}
 

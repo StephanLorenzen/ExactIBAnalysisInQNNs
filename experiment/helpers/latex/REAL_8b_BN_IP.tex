@@ -22,9 +22,16 @@
 	\end{groupplot}
 
   % Compression arrow, layer -1
-	\node (cs1) at (3.3,5.1){};
-       	\node (cd1) at (2.4,5.7){};
-	\draw[compression](cs1) -- node[anchor=center, above=3mm] {\bf\small Compression in 2D layer} (cd1);
+	\node (cs1) at (4.5,5.7){};
+       	\node (cd1) at (3.4,6.3){};
+	
+  \draw[compression](cs1) -- node[anchor=center, above=3mm] {\bf\small Compression in 2D layer} (cd1);
+
+  % Labels
+  \node at (0.57,0.52){$\hat Y=T_5$};
+  \node at (1.6,0.2){$T_4$};
+  \node at (4.4,2.4){$T_3$};
+  \node at (6.7,5.8){$T_2$};
 \end{tikzpicture}
 
 \end{document}

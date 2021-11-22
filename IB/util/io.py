@@ -36,6 +36,7 @@ def _check_repeats_bad_fit(path, repeats):
             filtered.append(rep)
     if len(filtered)!=len(repeats):
         print("### WARN: Remove",len(repeats)-len(filtered),"bad fits! ###")
+    print("### Total number of repeats = "+str(len(filtered))+" for path = '"+path+"' ###")
     return np.array(filtered)
 
 def load_MI_repeats(path, est="binning_uniform_30", load_prefit=False):

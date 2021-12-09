@@ -50,14 +50,23 @@ def run_experiment(
             if Est.require_setup():
                 raise Exception("Estimator requires setup - cannot use low memory setting!")
             lmest.append(lambda A: Est(A,y))
-    for rep in range(start_from-1, repeats):
+    restarts = 0
+    rep = start_from-1
+    while rep<repeats:
         print(">>> Iteration: "+_zp(rep+1))
 
         # Train and get activations
         print(">> Fitting model, "+str(epochs)+" epochs")
         ts = time()
         if prefit_random>0: print(">>> Prefitting to random labels: "+str(prefit_random)+" epochs")
-        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,prefit_random=prefit_random,estimators=lmest, seed=seed+rep) 
+        info, train_acc, test_acc = train_model(Model,lr,batch_size,epochs,train,test,X,prefit_random=prefit_random,estimators=lmest, seed=seed+rep+restarts)
+        if info is None:
+            print("!!! Restarting repetition")
+            restarts += 1
+            continue
+        else:
+            rep += 1
+            restarts = 0
         print(">> Fitting done, elapsed: "+str(int(time()-ts))+"s")
         print(">> Computing mutual information ("+str(len(MI_estimators))+" estimators)")
         for i,Est in enumerate(MI_estimators):
@@ -74,32 +83,30 @@ def run_experiment(
                 MIs_prefit = compute_MI(info["prefit"]["activations"]) if "prefit" in info else None
                 MIs = compute_MI(Est, info["activations"], y)
                 print(">>> Mutual information computed, elapsed: "+str(int(time()-ts))+"s")
-            np.savetxt(path+_zp(rep+1)+".txt", MIs.reshape(MIs.shape[0],-1))
+            
+            n_epoch = MIs.shape[0]
+            MIs = np.concatenate([info["epoch"].reshape(n_epoch,-1),MIs.reshape(n_epoch,-1)], axis=1)
+            np.savetxt(path+_zp(rep)+".txt", MIs)
             if MIs_prefit is not None:
-                np.savetxt(path+_zp(rep+1)+"_prefit.txt", MIs_prefit.reshape(MIs_prefit.shape[0],-1))
+                n_prefit = MIs_prefit.shape[0]
+                MIs_prefit = np.concatenate([info["prefit"]["epoch"].reshape(n_prefit,-1),MIs_prefit.reshape(n_prefit,-1)], axis=1)
+                np.savetxt(path+_zp(rep)+"_prefit.txt", MIs_prefit)
 
         # Store train and test accuracy and activation min/max
         print(">> Storing training and test accuracies.")
         pd.DataFrame({
             "train_acc":train_acc,
             "test_acc":test_acc
-        }).to_csv(acc_path+_zp(rep+1)+".csv", index_label="epoch")
+        }).to_csv(acc_path+_zp(rep)+".csv", index_label="epoch")
+        
         print(">> Storing activation info.")
-        if rep==0 and 'acts_2D' in info:
-            print(">>> Storing activations for 2D layer")
-            for epoch,dat in info['acts_2D']:
-                df = pd.DataFrame(dat, columns=["n1","n2"])
-                df["y"] = y;
-                df.to_csv(_2D_path+str(epoch)+".csv", index_label="i")
         col_layers = ["layer_"+str(i+1) for i in range(info["min"].shape[1])]
-        pd.DataFrame(
-            np.array(info["min"]),
-            columns=col_layers
-        ).to_csv(act_path+_zp(rep+1)+"_min.csv", index_label="epoch")
-        pd.DataFrame(
-            np.array(info["max"]),
-            columns=col_layers
-        ).to_csv(act_path+_zp(rep+1)+"_max.csv", index_label="epoch")
+        df_min = pd.DataFrame(np.array(info["min"]),columns=col_layers)
+        df_min.index = info["epoch"]
+        df_min.to_csv(act_path+_zp(rep)+"_min.csv", index_label="epoch")
+        df_max = pd.DataFrame(np.array(info["max"]),columns=col_layers)
+        df_max.index = info["epoch"]
+        df_max.to_csv(act_path+_zp(rep)+"_max.csv", index_label="epoch")
 
 def _zp(val):
     val = str(val)
@@ -142,12 +149,19 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, prefit_
         
     # Output
     info = dict()
+    compute_freq = 5 if epochs >= 8000 else 2
     
     # Prefit random:
     if prefit_random>0:
         # prefit_random is number of epochs to prefit
         rand_info = dict()
-        cb = callbacks.TrainingTracker(X,rand_info,estimators=estimators,quantized=quantized)
+        cb = callbacks.TrainingTracker(
+                X,
+                rand_info,
+                estimators=estimators,
+                quantized=quantized,
+                compute_MI_freq=compute_freq)
+        
         # Shuffle labels
         random_y_train = tf.random.shuffle(y_train)
         model.fit(
@@ -158,12 +172,20 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, prefit_
             callbacks=[cb],
             verbose=0
         )
+        rand_info["epoch"] = np.array(rand_info["epoch"])
         rand_info["min"] = np.array(rand_info["min"])
         rand_info["max"] = np.array(rand_info["max"])
         info["prefit"] = rand_info
 
     # Callback
-    callback = callbacks.TrainingTracker(X, info, estimators=estimators, quantized=quantized)
+    callback = callbacks.TrainingTracker(
+        X, 
+        info, 
+        estimators=estimators, 
+        quantized=quantized,
+        compute_MI_freq=compute_freq,
+        auto_stop=True
+    )
     # Fit
     hist = model.fit(
             X_train,
@@ -174,10 +196,12 @@ def train_model(Model, lr, batch_size, epochs, train_data, test_data, X, prefit_
             validation_data=test_data,
             verbose=0
             )
+    if model.stop_training:
+        print("!!! Stopped training - bad fit.")
+        return None, None, None
+    info["epoch"] = np.array(info["epoch"])
     info["min"] = np.array(info["min"])
     info["max"] = np.array(info["max"])
-    if "unique" in info:
-        info["unique"] = np.array(info["unique"])
     return info, hist.history["accuracy"], hist.history["val_accuracy"]
 def _apply_estimator(inp):
     A, y, Est = inp

@@ -3,8 +3,11 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
 
+THRESHOLD = 0.55
+EPS = 10**-9
+
 class TrainingTracker(keras.callbacks.Callback):
-    def __init__(self, X, info, estimators=None, quantized=False, model_save_path=None):
+    def __init__(self, X, info, estimators=None, quantized=False, compute_MI_freq=1, auto_stop=False):
         super(TrainingTracker, self).__init__()
         self.data = X.astype(float)
         self.info = info
@@ -15,11 +18,32 @@ class TrainingTracker(keras.callbacks.Callback):
             self.info["MI"] = [[] for _ in self.estimators]
         self.info["max"] = []
         self.info["min"] = []
+        self.info["epoch"] = []
         self.quantized = quantized
-        self.model_save_path = model_save_path
-        self.save_epochs = set(list(range(1,10+1))+list(range(10,101,10))+list(range(200,8001,200)))
+        self.compute_MI_freq = compute_MI_freq
+        
+        self.astop = auto_stop
+        self.astop_cnt = 0
+        self.astop_cur = 0.0
 
     def on_epoch_end(self, epoch, logs=None):
+        # Check if bad fitting = bad acc and no change
+        acc = logs['accuracy']
+        if self.astop and acc < THRESHOLD:
+            if abs(acc-self.astop_cur)>EPS:
+                self.astop_cur = acc
+                self.astop_cnt = 0
+            else:
+                self.astop_cnt += 1
+                if self.astop_cnt>10:
+                    self.model.stop_training = True
+                    return
+       
+        # Don't compute MI every epoch
+        if epoch % self.compute_MI_freq > 0:
+            return
+
+        self.info["epoch"].append(epoch)
         skip_first = 1 if self.quantized else 0
         mis, mxs = [], []
         if self.estimators is None:
@@ -38,13 +62,6 @@ class TrainingTracker(keras.callbacks.Callback):
                 lA = np.concatenate(lA)
             mis.append(np.min(lA))
             mxs.append(np.max(lA))
-            if len(lA.shape)==2 and lA.shape[1]==2 and (epoch+1) in self.save_epochs:
-                # Two dimensional and flat -> store for plot
-                if "acts_2D" not in self.info:
-                    self.info["acts_2D"] = []
-                self.info["acts_2D"].append((epoch,lA))
-                if self.model_save_path!=None:
-                    self.model.save(self.model_save_path+str(epoch+1))
             if self.estimators is None:
                 A.append(lA)
             else:
@@ -58,4 +75,4 @@ class TrainingTracker(keras.callbacks.Callback):
                 self.info["MI"][i].append(MI)
         self.info["min"].append(mis)
         self.info["max"].append(mxs)
-         
+        

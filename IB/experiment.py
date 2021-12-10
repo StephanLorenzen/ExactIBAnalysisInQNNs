@@ -80,7 +80,7 @@ def run_experiment(
             else:
                 print(">>> Estimating, "+str(Est))
                 ts = time()
-                MIs_prefit = compute_MI(info["prefit"]["activations"]) if "prefit" in info else None
+                MIs_prefit = compute_MI(Est, info["prefit"]["activations"], y) if "prefit" in info else None
                 MIs = compute_MI(Est, info["activations"], y)
                 print(">>> Mutual information computed, elapsed: "+str(int(time()-ts))+"s")
             

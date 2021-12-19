@@ -4,7 +4,6 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 
 THRESHOLD = 0.55
-EPS = 10**-9
 
 class TrainingTracker(keras.callbacks.Callback):
     def __init__(self, X, info, estimators=None, quantized=False, compute_MI_freq=1, auto_stop=False):
@@ -23,21 +22,13 @@ class TrainingTracker(keras.callbacks.Callback):
         self.compute_MI_freq = compute_MI_freq
         
         self.astop = auto_stop
-        self.astop_cnt = 0
-        self.astop_cur = 0.0
 
     def on_epoch_end(self, epoch, logs=None):
         # Check if bad fitting = bad acc and no change
         acc = logs['accuracy']
-        if self.astop and acc < THRESHOLD:
-            if abs(acc-self.astop_cur)>EPS:
-                self.astop_cur = acc
-                self.astop_cnt = 0
-            else:
-                self.astop_cnt += 1
-                if self.astop_cnt>10:
-                    self.model.stop_training = True
-                    return
+        if self.astop and acc < THRESHOLD and epoch>=1000:
+            self.model.stop_training = True
+            return
        
         # Don't compute MI every epoch
         if epoch % self.compute_MI_freq > 0:

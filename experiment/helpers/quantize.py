@@ -43,4 +43,4 @@ if __name__ == '__main__':
     res_path = "out/quantized/"+exp+("_prefit_"+str(prefit) if prefit>0 else "")+"/"+str(bits)+"/"
 
     print("Starting quantized experiment.")
-    run_experiment(Model, estimators, dname, epochs=epochs, prefit_random=prefit, repeats=repeats, low_memory=True, out_path=res_path)
+    run_experiment(Model, estimators, dname, epochs=epochs, prefit_random=prefit, repeats=repeats, low_memory=(dname!="SYN"), out_path=res_path)

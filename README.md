@@ -5,7 +5,7 @@ This repository consists of tools for applying _information bottleneck_ (IB) ana
 
 The study applies and exact version of the IB analysis for neural networks as investigated and discussed in [2,3].
 
-![Information plane for the Bottleneck-2 network applied to MNIST](example_plot.pdf)
+![Information plane for the Bottleneck-2 network applied to MNIST](example_plot.png)
 Information plane for the `Bottleneck-2` network applied to MNIST.
 
 ## Requirements

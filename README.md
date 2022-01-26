@@ -3,7 +3,10 @@ This repository consists of tools for applying _information bottleneck_ (IB) ana
 
 > [Stephan Sloth Lorenzen, Christian Igel & Mads Nielsen. _Information Bottleneck: Exact Analysis of (Quantized Neural Networks_.](https://arxiv.org/abs/2106.12912)
 
-The study applies and exact version of the IB analysis for neural networks as investiaged and discussed in [2,3].
+The study applies and exact version of the IB analysis for neural networks as investigated and discussed in [2,3].
+
+![Information plane for the Bottleneck-2 network applied to MNIST](example_plot.pdf)
+Information plane for the `Bottleneck-2` network applied to MNIST.
 
 ## Requirements
 The code has been tested using (Arch) Linux, but runs in Windows with only few modifications.
@@ -13,7 +16,8 @@ The following python libraries are required:
 * `pandas`
 * `tensorflow`
 * `tensorflow_model_optimization`
-* `lualatex` for making the plots 
+
+Furthermore, `lualatex` is required for making the plots. 
 
 ## Overview
 The important directories and files in the repository are:
@@ -49,7 +53,7 @@ make bit-width       # 4-/32-bit quantization experiments, Appendix C
 make quantize-prefit # Quantization with randomized prefitting, Appendix D
 make quantize-archs  # Quantization of different MNIST architectures, Appendix E
 ``` 
-**Please note, that the experiments below may run for a long time and require a significant amount of memory.** Most experiments run for many iterations and computes/estimates MI between large quantities. Time per iteration may be minutes (synthetic data) or more than 12 hours (convolutional MNIST network).
+**Please note, that the experiments above may run for a long time and require a significant amount of memory.** Most experiments run for many iterations and computes/estimates MI between large quantities. Time per iteration may be minutes (synthetic data) or more than 12 hours (convolutional MNIST network).
 
 ### Plotting results
 To create the plots from [1]  (corresponding to the above experiments), use:
@@ -64,7 +68,7 @@ make plot-accuracy   # Accuracy plots, Appendix F
 The plots are made using lualatex and will take a few minutes to compile, as many data points are plotted for each information plane.
 
 ## Running other experiments
-Other experiments can be run using the module directly (note, some options left out here, use `--help` for full list):
+Other experiments can be run using the module directly (note, some options are left out here, use `--help` for the full list):
 ```
 python -m IB experiment [-h] [-n NETWORK] [-af ACT_FUNC] [-lr LR] [-e EPOCHS] [-q]
                               [-b BITS] [-d DATA] [-r REPEATS]
@@ -86,10 +90,14 @@ Alternatively, one may use the python helper scripts in `experiment/helpers`:
 python helpers/binning.py <experiment> [prefit=0] [repeats=50]
 python helpers/quantize.py <experiment> <bits> [prefit=0] [repeats=50]
 ```
-where `experiment` is one of `SYN-{Tanh,Relu}` or `MNIST-{4x10,Conv,Bottleneck-2,Bottleneck-4,HourGlass}`, `bits` are 4, 8 or 32, and `prefit` is the number of randomized prefitting epochs (0 means no prefitting).
+where `experiment` is one of `SYN-{Tanh,Relu}` or `MNIST-{4x10,Conv,Bottleneck-2,Bottleneck-4,HourGlass}`, `bits` are the precision of the quantization (4, 8 or 32), and `prefit` is the number of randomized prefitting epochs (0 means no prefitting).
 
 ## References
+
 [1] [Stephan Sloth Lorenzen, Christian Igel, & Mads Nielsen. _Information Bottleneck: Exact Analysis in (Quantized) Neural Networks_. ICLR (2022).](https://arxiv.org/abs/2106.12912)
+
 [2] [Ravid Shwartz-Ziv & Naftali Tishby. _Opening the black box of deep neural networks via information._ arXiv (2017).](https://arxiv.org/abs/1703.00810)
+
 [3] Andrew M. Saxe, Yamini Bansal, Joel Dapello, Madhu Advani, Artemy Kolchinsky, & Brendan D. Tracey. _On the information bottleneck theory of deep learning_. ICLR (2018).
+
 [4] Li Deng. _The MNIST database of handwritten digit images for machine learning research_. IEEE Signal Processing Magazine (2021).

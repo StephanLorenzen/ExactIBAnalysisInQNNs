@@ -19,17 +19,12 @@ def latex_MI(est,out_suf,data_path,prefit=False):
         os.makedirs(out_dir)
     out_file = out_dir+est+("_prefit" if prefit else "")+".csv"
     print("Creating MI plane file: '"+out_file+"'")
-    try: mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
+    try: epochs, mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
     except Exception as e:
         print("File not found",(data_path,est,e))
         return
     df  = {"x":[],"y":[],"c":[]}
-    # 8000 / 5 * 6 = 9600
-    # 3000 / 2 * 5 = 7500
-    mod = 5 if len(mean)>6000 else 2
-    for epoch,mi in enumerate(mean):
-        if epoch%mod != 0:
-            continue
+    for epoch,mi in zip(epochs,mean):
         df["c"] += [epoch/len(mean)]*len(mi)
         df["x"] += [x for x,_ in mi]
         df["y"] += [y for _,y in mi]
@@ -41,11 +36,13 @@ def latex_MI_ranks(est,out_suf,data_path):
     out_dir = OUT_DIR+out_suf
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
-    try: mean, _ = iio.load_MI(data_path,est,load_prefit=False)
+    try: epochs,mean, _ = iio.load_MI(data_path,est,load_prefit=False)
     except:
         print("File not found",(data_path,est))
         return
-    repeats = iio.load_MI_repeats(data_path,est,load_prefit=False)
+    epochs2,repeats = iio.load_MI_repeats(data_path,est,load_prefit=False)
+    assert (epochs==epochs2).all()
+
     n_rep, n_epoch, n_layer = repeats.shape
     mean = np.array(mean).reshape(-1,n_layer)
     
@@ -60,12 +57,7 @@ def latex_MI_ranks(est,out_suf,data_path):
     ]
     for name, rep in relevant:
         df  = {"x":[],"y":[],"c":[]}
-        # 8000 / 5 = 1600
-        # 3000 / 2 = 1500
-        mod = 5 if len(mean)>6000 else 2
-        for epoch,mi in enumerate(rep):
-            if epoch % mod != 0:
-                continue
+        for epoch,mi in zip(epochs,rep):
             df["c"] += [epoch/n_epoch]*len(mi)
             df["x"] += [x for x,_ in mi]
             df["y"] += [y for _,y in mi]
@@ -79,7 +71,7 @@ def latex_MI_var(est,out_suf,data_path,var="X",prefit=False):
         os.makedirs(out_dir)
     out_file = out_dir+est+"_"+var+("_prefit" if prefit else "")+".csv"
     print("Creating MI plane file for "+var+": '"+out_file+"'")
-    try: mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
+    try: epochs, mean, std = iio.load_MI(data_path,est,load_prefit=prefit)
     except:
         print("File not found",(data_path,est))
         return
@@ -89,14 +81,8 @@ def latex_MI_var(est,out_suf,data_path,var="X",prefit=False):
         df["mean_"+str(i+1)] = []
         df["up_"+str(i+1)] = []
         df["lw_"+str(i+1)] = []
-    # 8000 / 5 = 1600
-    # 3000 / 2 = 1500
-    mod = 5 if len(mean)>6000 else 2
     didx = 0 if var=="X" else 1
-    for epoch,mi_mean in enumerate(mean):
-        if epoch % mod != 0:
-            continue
-        mi_std = std[epoch]
+    for epoch,mi_mean,mi_std in zip(epochs,mean,std):
         df["epoch"].append(epoch)
         for i in range(nl):
             df["mean_"+str(i+1)].append(mi_mean[i][didx])

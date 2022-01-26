@@ -54,22 +54,27 @@ def load_MI_repeats(path, est="binning_uniform_30", load_prefit=False):
 
     suffix = "_prefit.txt" if load_prefit else ".txt" 
     files.sort()
+    epochs = None
     for f in files:
         cnt = int(f[:3])-1
         if not f[3:]==suffix: continue
-        epoch = np.genfromtxt(mi_path+f)
+        run = np.genfromtxt(mi_path+f)
+        eps = run[:,0].astype(int)
+        epochs = eps if epochs is None else epochs
+        assert (epochs==eps).all()
+        run = run[:,1:]
         assert(cnt==len(repeats))
-        l = len(epoch) if l is None else l
-        assert(len(epoch)==l)
-        repeats.append(epoch)
+        l = len(run) if l is None else l
+        assert(len(run)==l)
+        repeats.append(run)
     
     repeats = _check_repeats_bad_fit(path, repeats)
-    return np.array(repeats)
+    return epochs, np.array(repeats)
 
 def load_MI(path, est=None, load_prefit=False):
-    repeats = load_MI_repeats(path,est,load_prefit=load_prefit)
-    nmean   = np.mean(repeats,axis=0)
-    nstd    = np.std(repeats,axis=0)
+    epochs, repeats = load_MI_repeats(path,est,load_prefit=load_prefit)
+    nmean           = np.mean(repeats,axis=0)
+    nstd            = np.std(repeats,axis=0)
 
     num_epochs, num_layers = nmean.shape
     num_layers //= 2
@@ -79,7 +84,7 @@ def load_MI(path, est=None, load_prefit=False):
         mean.append([(ms[2*i],ms[2*i+1]) for i in range(num_layers)])
         std.append([(ss[2*i],ss[2*i+1]) for i in range(num_layers)])
 
-    return mean, std
+    return epochs, mean, std
 
 def load_accuracy(path):
     if not os.path.isdir(path):

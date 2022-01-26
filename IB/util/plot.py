@@ -6,15 +6,17 @@ import matplotlib.pyplot as plt
 
 from . import io as IBio
 
-def information_plane(repeats=None, path=None, est=None):
+def information_plane(epochs=None,repeats=None, path=None, est=None):
     if repeats is None:
         if path is None or est is None:
             raise Exception("Missing path or estimator...")
-        repeats,_ = IBio.load_MI(path, est=est)
-    num_epochs = len(repeats)
+        epochs,repeats,_ = IBio.load_MI(path, est=est)
+    else:
+        assert epochs is not None
+    assert len(epochs)==len(repeats)
     x,y,c = [],[],[]
-    for epoch_idx, MIs in enumerate(repeats):
-        c += [epoch_idx/num_epochs]*len(MIs)
+    for epoch, MIs in zip(epochs,repeats):
+        c += [epoch/num_epochs]*len(MIs)
         for (XT,TY) in MIs:
             x.append(XT)
             y.append(TY)

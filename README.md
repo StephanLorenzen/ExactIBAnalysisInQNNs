@@ -93,6 +93,15 @@ python helpers/quantize.py <experiment> <bits> [prefit=0] [repeats=50]
 ```
 where `experiment` is one of `SYN-{Tanh,Relu}` or `MNIST-{4x10,Conv,Bottleneck-2,Bottleneck-4,HourGlass}`, `bits` are the precision of the quantization (4, 8 or 32), and `prefit` is the number of randomized prefitting epochs (0 means no prefitting).
 
+## Acknowledgement
+Please cite our paper, if you found the code useful in your work/publication:
+```
+@inproceedings{
+lorenzen2022information,
+title={Information Bottleneck: Exact Analysis of (Quantized) Neural Networks}, author={Stephan Sloth Lorenzen and Christian Igel and Mads Nielsen}, booktitle={International Conference on Learning Representations}, year={2022}, url={https://openreview.net/forum?id=kF9DZQQrU0w}
+}
+```
+
 ## References
 
 [1] [Stephan Sloth Lorenzen, Christian Igel, & Mads Nielsen. _Information Bottleneck: Exact Analysis in (Quantized) Neural Networks_. ICLR (2022).](https://arxiv.org/abs/2106.12912)
